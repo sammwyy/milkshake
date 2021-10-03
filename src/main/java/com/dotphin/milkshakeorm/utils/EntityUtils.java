@@ -19,9 +19,6 @@ public class EntityUtils {
         try {
             for (final Field field : clazz.getFields()) {
                 if (field.isAnnotationPresent(ID.class)) {
-                    if (!field.canAccess(obj)) {
-                        field.setAccessible(true);
-                    }
                     field.set(obj, id);
                     return;
                 }
@@ -39,9 +36,6 @@ public class EntityUtils {
         try {
             for (final Field field : clazz.getFields()) {
                 if (field.isAnnotationPresent(ID.class)) {
-                    if (!field.canAccess(obj)) {
-                        field.setAccessible(true);
-                    }
                     return (String) field.get(obj);
                 }
             }
