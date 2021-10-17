@@ -48,10 +48,8 @@ public class EntityUtils {
 
     public static boolean isSerializableObject(final Object value) {
         return value instanceof Integer || value instanceof String || value instanceof Boolean || value instanceof Float
-                || value instanceof Double || value instanceof Map || value instanceof HashMap
-                || value instanceof String[] || value instanceof Integer[] || value instanceof Boolean[]
-                || value instanceof Float[] || value instanceof Double[] || value instanceof Map[]
-                || value instanceof HashMap[] || value instanceof List || value instanceof ArrayList;
+                || value instanceof Double || value instanceof String[] || value instanceof Integer[]
+                || value instanceof Boolean[] || value instanceof Float[] || value instanceof Double[];
     }
 
     public static Map<String, Object> mapEntityToProps(final Object obj) {
@@ -95,7 +93,7 @@ public class EntityUtils {
                 try {
                     field.set(obj, value);
                 } catch (IllegalArgumentException ignored) {
-                    field.set(obj, value.toString());
+                    // field.set(obj, value.toString());
                 }
                 field.setAccessible(false);
             }

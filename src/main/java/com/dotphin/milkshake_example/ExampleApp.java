@@ -117,8 +117,8 @@ public class ExampleApp {
 
         Repository<User> repository = MilkshakeORM.getRepository(User.class);
 
-        User[] usersCalledSam = repository.findMany(MapFactory.create("username", "sam"));
-        User[] allUsers = repository.findMany(new HashMap<>());
+        final User[] usersCalledSam = repository.findMany(MapFactory.create("username", "sam"));
+        final User[] allUsers = repository.findMany(new HashMap<>());
 
         System.out.println("Users called sam: " + usersCalledSam.length);
         System.out.println("All users: " + allUsers.length);
