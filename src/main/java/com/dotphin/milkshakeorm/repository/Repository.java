@@ -1,5 +1,6 @@
 package com.dotphin.milkshakeorm.repository;
 
+import java.lang.reflect.Array;
 import java.util.Map;
 
 import com.dotphin.milkshakeorm.errors.NotIDAnnotationException;
@@ -65,8 +66,14 @@ public class Repository<S> {
     }
 
     public S[] findMany(final Map<String, Object> filter) {
-        Object[] obj = EntityUtils.mapPropsToEntity(entity, this.provider.findMany(this.entity.getName(), filter));
-        return (S[]) obj;
+        Object[] objs = EntityUtils.mapPropsToEntity(entity, this.provider.findMany(this.entity.getName(), filter));
+        S[] list = (S[]) Array.newInstance(entity, objs.length);
+
+        for (int i = 0; i < objs.length; i++) {
+            list[i] = (S) objs[i];
+        }
+
+        return list;
     }
 
     /* Update operations */

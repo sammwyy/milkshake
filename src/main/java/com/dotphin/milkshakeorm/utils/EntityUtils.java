@@ -13,13 +13,13 @@ import java.util.Map;
 
 public class EntityUtils {
 
-    public static void setEntityID(final Object obj, final String id) throws NotIDAnnotationException {
+    public static void setEntityID(final Object obj, final Object id) throws NotIDAnnotationException {
         final Class<?> clazz = obj.getClass();
 
         try {
             for (final Field field : clazz.getFields()) {
                 if (field.isAnnotationPresent(ID.class)) {
-                    field.set(obj, id);
+                    field.set(obj, id.toString());
                     return;
                 }
             }

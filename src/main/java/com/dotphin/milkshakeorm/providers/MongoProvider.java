@@ -49,7 +49,7 @@ public class MongoProvider implements IProvider {
         final MongoCollection<Document> documents = database.getCollection(entity);
         final Document doc = new Document(props);
         final InsertOneResult result = documents.insertOne(doc);
-        return result.getInsertedId().toString();
+        return result.getInsertedId().asObjectId().getValue().toHexString();
     }
 
     /* Find */
