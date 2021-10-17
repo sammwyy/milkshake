@@ -12,7 +12,7 @@ public class ExampleApp {
     public static void test1_connect_mongodb() {
         System.out.println("=== Test #1 - Connect to MongoDB ===");
 
-        MilkshakeORM.connect(DatabaseType.MONGODB, "mongodb://localhost/testing-10");
+        MilkshakeORM.connect(DatabaseType.MONGODB, "mongodb://localhost/testing-19");
 
         System.out.println("\n");
     }
@@ -108,12 +108,15 @@ public class ExampleApp {
         user1.save();
 
         User user2 = new User();
-        user2.username = "another";
+        user2.username = "sam";
         user2.save();
 
         User user3 = new User();
         user3.username = "sam";
         user3.save();
+
+        user2.username = "another";
+        user2.save();
 
         Repository<User> repository = MilkshakeORM.getRepository(User.class);
 

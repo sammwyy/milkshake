@@ -13,13 +13,13 @@ import java.util.Map;
 
 public class EntityUtils {
 
-    public static void setEntityID(final Object obj, final Object id) throws NotIDAnnotationException {
+    public static void setEntityID(final Object obj, final String id) throws NotIDAnnotationException {
         final Class<?> clazz = obj.getClass();
 
         try {
             for (final Field field : clazz.getFields()) {
                 if (field.isAnnotationPresent(ID.class)) {
-                    field.set(obj, id.toString());
+                    field.set(obj, id);
                     return;
                 }
             }
@@ -48,8 +48,10 @@ public class EntityUtils {
 
     public static boolean isSerializableObject(final Object value) {
         return value instanceof Integer || value instanceof String || value instanceof Boolean || value instanceof Float
-                || value instanceof Double || value instanceof String[] || value instanceof Integer[]
-                || value instanceof Boolean[] || value instanceof Float[] || value instanceof Double[];
+                || value instanceof Double || value instanceof Map || value instanceof HashMap
+                || value instanceof String[] || value instanceof Integer[] || value instanceof Boolean[]
+                || value instanceof Float[] || value instanceof Double[] || value instanceof Map[]
+                || value instanceof HashMap[] || value instanceof List || value instanceof ArrayList;
     }
 
     public static Map<String, Object> mapEntityToProps(final Object obj) {
@@ -93,7 +95,7 @@ public class EntityUtils {
                 try {
                     field.set(obj, value);
                 } catch (IllegalArgumentException ignored) {
-                    // field.set(obj, value.toString());
+                    field.set(obj, value.toString());
                 }
                 field.setAccessible(false);
             }
