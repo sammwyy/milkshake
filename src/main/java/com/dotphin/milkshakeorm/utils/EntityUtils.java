@@ -119,12 +119,13 @@ public class EntityUtils {
     }
 
     public static Object[] mapPropsToEntity(final Class<?> entity, final List<Map<String, Object>> propList) {
-        Object[] objs = new Object[propList.size()];
-        int index = 0;
+        final List<Object> objs = new ArrayList<>();
         for (final Map<String, Object> props : propList) {
-            objs[index] = EntityUtils.mapPropsToEntity(entity, props);
-            index++;
+            Object value = EntityUtils.mapPropsToEntity(entity, props);
+            if (value.getClass().equals(entity)) {
+                objs.add(value);
+            }
         }
-        return objs;
+        return objs.toArray();
     }
 }
