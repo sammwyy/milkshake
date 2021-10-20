@@ -25,7 +25,7 @@ public class Repository<S> {
         if (id == null) {
             id = this.provider.create(entity.getName(), props);
         } else {
-            this.provider.updateByID(entity.getName(), id, props)
+            this.provider.updateByID(entity.getName(), id, props);
         }
 
         EntityUtils.setEntityID(obj, id);
