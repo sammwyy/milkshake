@@ -22,8 +22,10 @@ public class Repository<S> {
         final Map<String, Object> props = EntityUtils.mapEntityToProps(obj);
         String id = EntityUtils.getEntityID(obj);
 
-        if (id == null || !this.provider.updateByID(entity.getName(), id, props)) {
+        if (id == null) {
             id = this.provider.create(entity.getName(), props);
+        } else {
+            this.provider.updateByID(entity.getName(), id, props)
         }
 
         EntityUtils.setEntityID(obj, id);
