@@ -3,6 +3,8 @@ package com.dotphin.milkshakeorm.providers;
 import java.util.List;
 import java.util.Map;
 
+import com.dotphin.milkshakeorm.repository.FindOption;
+
 public interface IProvider {
 
     /* Database management */
@@ -14,7 +16,8 @@ public interface IProvider {
     public String create(final String entity, final Map<String, Object> props);
 
     /* Read */
-    public List<Map<String, Object>> findMany(final String entity, final Map<String, Object> filter);
+    public List<Map<String, Object>> findMany(final String entity, final Map<String, Object> filter,
+            final FindOption options);
 
     public Map<String, Object> findOne(final String entity, final Map<String, Object> filter);
 

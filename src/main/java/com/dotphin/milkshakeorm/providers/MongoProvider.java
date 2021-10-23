@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.dotphin.milkshakeorm.repository.FindOption;
 import com.dotphin.milkshakeorm.utils.MapFactory;
+import com.mongodb.BasicDBObject;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.FindIterable;
@@ -54,9 +56,15 @@ public class MongoProvider implements IProvider {
 
     /* Find */
     @Override
-    public List<Map<String, Object>> findMany(final String entity, final Map<String, Object> filter) {
+    public List<Map<String, Object>> findMany(final String entity, final Map<String, Object> filter,
+            final FindOption options) {
         final MongoCollection<Document> documents = database.getCollection(entity);
-        final FindIterable<Document> docsIterator = documents.find(new Document(filter));
+        FindIterable<Document> docsIterator = documents.find(new Document(filter));
+
+        if (options.getSortKey() != null) {
+            docsIterator = docsIterator.sort(new BasicDBObject(options.getSortKey(), options.getSortOrder()));
+        }
+
         final List<Map<String, Object>> objects = new ArrayList<>();
 
         docsIterator.forEach((Document doc) -> {

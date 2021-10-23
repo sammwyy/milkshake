@@ -65,8 +65,9 @@ public class Repository<S> {
         return (S) obj;
     }
 
-    public S[] findMany(final Map<String, Object> filter) {
-        Object[] objs = EntityUtils.mapPropsToEntity(entity, this.provider.findMany(this.entity.getName(), filter));
+    public S[] findMany(final Map<String, Object> filter, final FindOption options) {
+        Object[] objs = EntityUtils.mapPropsToEntity(entity,
+                this.provider.findMany(this.entity.getName(), filter, options));
         S[] list = (S[]) Array.newInstance(entity, objs.length);
 
         for (int i = 0; i < objs.length; i++) {
@@ -74,6 +75,10 @@ public class Repository<S> {
         }
 
         return list;
+    }
+
+    public S[] findMany(final Map<String, Object> filter) {
+        return this.findMany(filter, new FindOption());
     }
 
     /* Update operations */
