@@ -15,15 +15,21 @@ public class MilkshakeORM {
         IProvider provider = null;
 
         switch (type) {
-            case MONGODB:
-                provider = new MongoProvider().connect(connectionURI);
-                break;
-            default:
-                throw new Error("Unknown database type.");
+        case MONGODB:
+            provider = new MongoProvider().connect(connectionURI);
+            break;
+        default:
+            throw new Error("Unknown database type.");
         }
 
         providers.put(type, provider);
         return provider;
+    }
+
+    public static Repository<?> addRepository(Class<?> entity, IProvider provider, String collection) {
+        Repository<?> repository = new Repository<>(entity, provider, collection);
+        repositories.put(entity, repository);
+        return repository;
     }
 
     public static Repository<?> addRepository(Class<?> entity, IProvider provider) {
@@ -32,8 +38,20 @@ public class MilkshakeORM {
         return repository;
     }
 
+    public static Repository<?> addRepository(Class<?> entity, DatabaseType type, String collection) {
+        Repository<?> repository = new Repository<>(entity, providers.get(type), collection);
+        repositories.put(entity, repository);
+        return repository;
+    }
+
     public static Repository<?> addRepository(Class<?> entity, DatabaseType type) {
         Repository<?> repository = new Repository<>(entity, providers.get(type));
+        repositories.put(entity, repository);
+        return repository;
+    }
+
+    public static Repository<?> addRepository(Class<?> entity, String collection) {
+        Repository<?> repository = new Repository<>(entity, (IProvider) providers.values().toArray()[0], collection);
         repositories.put(entity, repository);
         return repository;
     }
