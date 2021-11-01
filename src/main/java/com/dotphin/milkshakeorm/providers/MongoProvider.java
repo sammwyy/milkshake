@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.dotphin.milkshakeorm.repository.FindOption;
 import com.dotphin.milkshakeorm.utils.MapFactory;
+import com.dotphin.milkshakeorm.utils.URI;
 import com.mongodb.BasicDBObject;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
@@ -21,15 +22,15 @@ import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-public class MongoProvider implements IProvider {
+public class MongoProvider implements Provider {
 
     private MongoClient client;
     private MongoDatabase database;
 
     /* Database management */
     @Override
-    public IProvider connect(String connectionURI) {
-        final ConnectionString connectionString = new ConnectionString(connectionURI);
+    public Provider connect(final URI uri) {
+        final ConnectionString connectionString = new ConnectionString(uri.toString());
         final MongoClientSettings settings = MongoClientSettings.builder().applyConnectionString(connectionString)
                 .retryWrites(true).build();
         this.client = MongoClients.create(settings);

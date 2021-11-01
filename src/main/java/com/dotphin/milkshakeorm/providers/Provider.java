@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.dotphin.milkshakeorm.repository.FindOption;
+import com.dotphin.milkshakeorm.utils.URI;
 
-public interface IProvider {
+public interface Provider {
 
     /* Database management */
-    public IProvider connect(final String connectionURI);
+    public Provider connect(final URI uri);
 
     public void disconnect();
 

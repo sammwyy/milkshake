@@ -3,66 +3,47 @@ package com.dotphin.milkshakeorm;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.dotphin.milkshakeorm.providers.IProvider;
+import com.dotphin.milkshakeorm.providers.Provider;
 import com.dotphin.milkshakeorm.providers.MongoProvider;
 import com.dotphin.milkshakeorm.repository.Repository;
+import com.dotphin.milkshakeorm.utils.URI;
 
+@SuppressWarnings("unchecked")
 public class MilkshakeORM {
     private static final Map<Class<?>, Repository<?>> repositories = new HashMap<>();
-    private static final Map<DatabaseType, IProvider> providers = new HashMap<>();
+    private static final Map<URI, Provider> cachedProviders = new HashMap<>();
 
-    public static IProvider connect(final DatabaseType type, final String connectionURI) {
-        IProvider provider = null;
+    public static Provider connect(final String connectionURI) {
+        final URI uri = new URI(connectionURI);
+        final String protocol = uri.getProtocol().toLowerCase();
 
-        switch (type) {
-        case MONGODB:
-            provider = new MongoProvider().connect(connectionURI);
-            break;
-        default:
-            throw new Error("Unknown database type.");
+        Provider provider = cachedProviders.get(uri);
+        if (provider != null) {
+            return provider;
         }
 
-        providers.put(type, provider);
+        if (protocol.equalsIgnoreCase("mongodb")) {
+            provider = new MongoProvider().connect(uri);
+        } else {
+            throw new Error("Unknown database protocol " + protocol);
+        }
+
+        cachedProviders.put(uri, provider);
         return provider;
     }
 
-    public static Repository<?> addRepository(Class<?> entity, IProvider provider, String collection) {
+    public static <S> Repository<S> addRepository(Class<?> entity, Provider provider, String collection) {
         Repository<?> repository = new Repository<>(entity, provider, collection);
         repositories.put(entity, repository);
-        return repository;
+        return (Repository<S>) repository;
     }
 
-    public static Repository<?> addRepository(Class<?> entity, IProvider provider) {
+    public static <S> Repository<S> addRepository(Class<?> entity, Provider provider) {
         Repository<?> repository = new Repository<>(entity, provider);
         repositories.put(entity, repository);
-        return repository;
+        return (Repository<S>) repository;
     }
 
-    public static Repository<?> addRepository(Class<?> entity, DatabaseType type, String collection) {
-        Repository<?> repository = new Repository<>(entity, providers.get(type), collection);
-        repositories.put(entity, repository);
-        return repository;
-    }
-
-    public static Repository<?> addRepository(Class<?> entity, DatabaseType type) {
-        Repository<?> repository = new Repository<>(entity, providers.get(type));
-        repositories.put(entity, repository);
-        return repository;
-    }
-
-    public static Repository<?> addRepository(Class<?> entity, String collection) {
-        Repository<?> repository = new Repository<>(entity, (IProvider) providers.values().toArray()[0], collection);
-        repositories.put(entity, repository);
-        return repository;
-    }
-
-    public static Repository<?> addRepository(Class<?> entity) {
-        Repository<?> repository = new Repository<>(entity, (IProvider) providers.values().toArray()[0]);
-        repositories.put(entity, repository);
-        return repository;
-    }
-
-    @SuppressWarnings("unchecked")
     public static <S> Repository<S> getRepository(Class<?> entity) {
         return (Repository<S>) repositories.get(entity);
     }

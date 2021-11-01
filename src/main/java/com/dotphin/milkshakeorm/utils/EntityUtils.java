@@ -19,6 +19,7 @@ public class EntityUtils {
         try {
             for (final Field field : clazz.getFields()) {
                 if (field.isAnnotationPresent(ID.class)) {
+                    field.setAccessible(true);
                     field.set(obj, id);
                     return;
                 }

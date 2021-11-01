@@ -4,22 +4,22 @@ import java.lang.reflect.Array;
 import java.util.Map;
 
 import com.dotphin.milkshakeorm.errors.NotIDAnnotationException;
-import com.dotphin.milkshakeorm.providers.IProvider;
+import com.dotphin.milkshakeorm.providers.Provider;
 import com.dotphin.milkshakeorm.utils.EntityUtils;
 
 @SuppressWarnings("unchecked")
 public class Repository<S> {
     private final String collection;
     private final Class<?> entity;
-    private final IProvider provider;
+    private final Provider provider;
 
-    public Repository(final Class<?> entity, final IProvider provider, final String collection) {
+    public Repository(final Class<?> entity, final Provider provider, final String collection) {
         this.collection = collection;
         this.entity = entity;
         this.provider = provider;
     }
 
-    public Repository(final Class<?> entity, final IProvider provider) {
+    public Repository(final Class<?> entity, final Provider provider) {
         this(entity, provider, entity.getName());
     }
 
