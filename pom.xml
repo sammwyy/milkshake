@@ -3,10 +3,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.dotphin</groupId>
-  <artifactId>milkshakeorm</artifactId>
-  <version>0.9-ALPHA</version>
+  <artifactId>milkshake-orm</artifactId>
+  <version>0.1-BETA</version>
 
-  <name>milkshakeorm</name>
+  <name>milkshake-orm</name>
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
 
