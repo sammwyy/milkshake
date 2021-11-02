@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/dotphin/MilkshakeORM/raw/main/docs/assets/icon.png" width="78px" alt="Milkshake Logo" />
+  <img src="https://github.com/dotphin/MilkshakeORM/raw/main/docs/assets/icon128.png" width="78px" alt="Milkshake Logo" />
   <h1>MilkshakeORM</h1>
   <p>MongoDB ORM/ODM for Java.</p>
 </div>
