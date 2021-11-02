@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://github.com/dotphin/MilkshakeORM/raw/main/docs/assets/icon.png" width="78px" alt="Milkshake Logo" />
   <h1>MilkshakeORM</h1>
-  <p>MultiORM/ODM for Java. Supports MongoDB, MySQL, MSSQL, PostgreSQL, Oracle, SQLite.</p>
+  <p>MongoDB ORM/ODM for Java.</p>
 </div>
 
 ## What is MilkshakeORM?
@@ -21,10 +21,10 @@ That is why we have created MilkshakeORM which imposes a single way to manipulat
 ## Supported Database engine
 
 - [x] MongoDB
-- [ ] MySQL
-- [ ] SQLite
-- [ ] PostgreSQL
-- [ ] MariaDB
+- [ ] MySQL (Maybe)
+- [ ] SQLite (Maybe)
+- [ ] PostgreSQL (Maybe)
+- [ ] MariaDB (Maybe)
 - [ ] Microsoft SQL Server (Maybe)
 - [ ] Redis (Maybe)
 - [ ] Oracle (Maybe)
@@ -35,8 +35,9 @@ That is why we have created MilkshakeORM which imposes a single way to manipulat
 ## ToDo List
 
 - [ ] Entity validation (required, unique, trim, lower, upper, length, min, max)
-- [ ] Entity CRUD operations.
-- [ ] Repository CRUD operations.
+- [x] Entity CRUD operations.
+- [x] Repository CRUD operations.
 - [ ] Restart database connections.
 - [ ] Improve Nested objects in Entities.
-- [ ] Documentation
+- [ ] Documentation.
+- [x] Reuse connections.
