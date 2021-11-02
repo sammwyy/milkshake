@@ -74,7 +74,8 @@ public class Repository<S> {
     }
 
     public S[] findMany(final Map<String, Object> filter, final FindOption options) {
-        Object[] objs = EntityUtils.mapPropsToEntity(entity, this.provider.findMany(this.collection, filter, options));
+        Object[] objs = EntityUtils.mapPropsToEntityList(entity,
+                this.provider.findMany(this.collection, filter, options));
         S[] list = (S[]) Array.newInstance(entity, objs.length);
 
         for (int i = 0; i < objs.length; i++) {

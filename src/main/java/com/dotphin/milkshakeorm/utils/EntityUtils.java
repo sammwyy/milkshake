@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 public class EntityUtils {
-
     public static void setEntityID(final Object obj, final String id) throws NotIDAnnotationException {
         final Class<?> clazz = obj.getClass();
 
@@ -119,7 +118,7 @@ public class EntityUtils {
         }
     }
 
-    public static Object[] mapPropsToEntity(final Class<?> entity, final List<Map<String, Object>> propList) {
+    public static Object[] mapPropsToEntityList(final Class<?> entity, final List<Map<String, Object>> propList) {
         final List<Object> objs = new ArrayList<>();
         for (final Map<String, Object> props : propList) {
             Object value = EntityUtils.mapPropsToEntity(entity, props);
