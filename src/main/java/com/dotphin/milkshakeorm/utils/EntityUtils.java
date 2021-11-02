@@ -12,6 +12,12 @@ import java.util.List;
 import java.util.Map;
 
 public class EntityUtils {
+    public static Map<String, String> entityToModel(final Class<?> clazz) {
+        final Map<String, String> model = new HashMap<>();
+        // TODO
+        return model;
+    }
+
     public static void setEntityID(final Object obj, final String id) throws NotIDAnnotationException {
         final Class<?> clazz = obj.getClass();
 

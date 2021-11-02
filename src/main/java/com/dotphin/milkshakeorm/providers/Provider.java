@@ -13,6 +13,8 @@ public interface Provider {
 
     public void disconnect();
 
+    public void prepare(final String entity, final Map<String, String> model);
+
     /* Create */
     public String create(final String entity, final Map<String, Object> props);
 

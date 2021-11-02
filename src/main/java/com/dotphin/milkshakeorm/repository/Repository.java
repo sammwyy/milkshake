@@ -19,10 +19,6 @@ public class Repository<S> {
         this.provider = provider;
     }
 
-    public Repository(final Class<?> entity, final Provider provider) {
-        this(entity, provider, entity.getName());
-    }
-
     /* Shorthand operations */
     public String save(final Object obj) throws NotIDAnnotationException {
         final Map<String, Object> props = EntityUtils.mapEntityToProps(obj);

@@ -6,6 +6,7 @@ import java.util.Map;
 import com.dotphin.milkshakeorm.providers.Provider;
 import com.dotphin.milkshakeorm.providers.impl.MongoProvider;
 import com.dotphin.milkshakeorm.repository.Repository;
+import com.dotphin.milkshakeorm.utils.EntityUtils;
 import com.dotphin.milkshakeorm.utils.URI;
 
 @SuppressWarnings("unchecked")
@@ -38,13 +39,12 @@ public class MilkshakeORM {
     public static <S> Repository<S> addRepository(Class<?> entity, Provider provider, String collection) {
         Repository<?> repository = new Repository<>(entity, provider, collection);
         repositories.put(entity, repository);
+        provider.prepare(collection, EntityUtils.entityToModel(entity));
         return (Repository<S>) repository;
     }
 
     public static <S> Repository<S> addRepository(Class<?> entity, Provider provider) {
-        Repository<?> repository = new Repository<>(entity, provider);
-        repositories.put(entity, repository);
-        return (Repository<S>) repository;
+        return addRepository(entity, provider, entity.getName());
     }
 
     public static <S> Repository<S> getRepository(Class<?> entity) {

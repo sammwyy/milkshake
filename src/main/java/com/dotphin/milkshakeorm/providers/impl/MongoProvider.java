@@ -48,6 +48,11 @@ public class MongoProvider implements Provider {
         }
     }
 
+    @Override
+    public void prepare(String _entity, Map<String, String> _model) {
+        // MongoDB doesn't requires preparation
+    }
+
     /* Create */
     @Override
     public String create(String entity, Map<String, Object> props) {
