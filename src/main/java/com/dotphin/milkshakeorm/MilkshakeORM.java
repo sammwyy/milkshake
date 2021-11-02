@@ -13,8 +13,7 @@ public class MilkshakeORM {
     private static final Map<Class<?>, Repository<?>> repositories = new HashMap<>();
     private static final Map<URI, Provider> cachedProviders = new HashMap<>();
 
-    public static Provider connect(final String connectionURI) {
-        final URI uri = new URI(connectionURI);
+    public static Provider connect(final URI uri) {
         final String protocol = uri.getProtocol().toLowerCase();
 
         Provider provider = cachedProviders.get(uri);
@@ -30,6 +29,10 @@ public class MilkshakeORM {
 
         cachedProviders.put(uri, provider);
         return provider;
+    }
+
+    public static Provider connect(final String connectionURI) {
+        return connect(new URI(connectionURI));
     }
 
     public static <S> Repository<S> addRepository(Class<?> entity, Provider provider, String collection) {
