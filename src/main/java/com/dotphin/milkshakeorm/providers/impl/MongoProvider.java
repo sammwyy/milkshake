@@ -1,12 +1,14 @@
-package com.dotphin.milkshakeorm.providers;
+package com.dotphin.milkshakeorm.providers.impl;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.dotphin.milkshakeorm.providers.Provider;
 import com.dotphin.milkshakeorm.repository.FindOption;
 import com.dotphin.milkshakeorm.utils.MapFactory;
 import com.dotphin.milkshakeorm.utils.URI;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.dotphin.milkshakeorm.providers.Provider;
-import com.dotphin.milkshakeorm.providers.MongoProvider;
+import com.dotphin.milkshakeorm.providers.impl.MongoProvider;
 import com.dotphin.milkshakeorm.repository.Repository;
 import com.dotphin.milkshakeorm.utils.URI;
 
