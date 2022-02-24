@@ -4,7 +4,7 @@
 
   <groupId>com.dotphin</groupId>
   <artifactId>milkshake-orm</artifactId>
-  <version>0.1-BETA</version>
+  <version>0.2-BETA</version>
 
   <name>milkshake-orm</name>
   <!-- FIXME change it to the project's website -->
@@ -20,7 +20,7 @@
     <dependency>
       <groupId>org.mongodb</groupId>
       <artifactId>mongodb-driver-sync</artifactId>
-      <version>4.3.2</version>
+      <version>4.3.3</version>
     </dependency>
   </dependencies>
 

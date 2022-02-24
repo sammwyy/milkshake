@@ -70,7 +70,15 @@ public class MongoProvider implements Provider {
         FindIterable<Document> docsIterator = documents.find(new Document(filter));
 
         if (options.getSortKey() != null) {
-            docsIterator = docsIterator.sort(new BasicDBObject(options.getSortKey(), options.getSortOrder()));
+            docsIterator.sort(new BasicDBObject(options.getSortKey(), options.getSortOrder()));
+        }
+
+        if (options.getLimit() > 0) {
+            docsIterator.limit(options.getLimit());
+        }
+
+        if (options.getSkip() > 0) {
+            docsIterator.skip(options.getSkip());
         }
 
         final List<Map<String, Object>> objects = new ArrayList<>();
