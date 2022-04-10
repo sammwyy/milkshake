@@ -71,9 +71,21 @@ public class MongoProvider implements Provider {
         final MongoCollection<Document> documents = database.getCollection(entity);
         FindIterable<Document> docsIterator = documents.find(new Document(filter));
 
+        BasicDBObject sorting = null;
 
         for (SortKey sort : options.getSorting()) {
-            docsIterator.sort(new BasicDBObject(sort.getKey(), sort.getType() == SortOrder.ASCENDANT ? 1 : -1));
+            String key = sort.getKey();
+            int order = sort.getType() == SortOrder.ASCENDANT ? 1 : -1;
+
+            if (sorting == null) {
+                sorting = new BasicDBObject(key, order);
+            } else {
+                sorting.append(key, order);
+            }
+        }
+
+        if (sorting != null) {
+            docsIterator.sort(sorting);
         }
 
         if (options.getSkip() > 0) {
