@@ -57,7 +57,7 @@ public class EntityUtils {
                 || value instanceof Double || value instanceof Map || value instanceof HashMap
                 || value instanceof String[] || value instanceof Integer[] || value instanceof Boolean[]
                 || value instanceof Float[] || value instanceof Double[] || value instanceof Map[]
-                || value instanceof HashMap[] || value instanceof List || value instanceof ArrayList;
+                || value instanceof HashMap[] || value instanceof List || value instanceof ArrayList || value instanceof Long || value instanceof Long[];
     }
 
     public static Map<String, Object> mapEntityToProps(final Object obj) {

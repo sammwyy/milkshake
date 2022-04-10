@@ -73,12 +73,12 @@ public class MongoProvider implements Provider {
             docsIterator.sort(new BasicDBObject(options.getSortKey(), options.getSortOrder()));
         }
 
-        if (options.getLimit() > 0) {
-            docsIterator.limit(options.getLimit());
-        }
-
         if (options.getSkip() > 0) {
             docsIterator.skip(options.getSkip());
+        }
+        
+        if (options.getLimit() > 0) {
+            docsIterator.limit(options.getLimit());
         }
 
         final List<Map<String, Object>> objects = new ArrayList<>();
