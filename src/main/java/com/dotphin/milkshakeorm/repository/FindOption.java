@@ -1,20 +1,20 @@
 package com.dotphin.milkshakeorm.repository;
 
-public class FindOption {
+import java.util.ArrayList;
+import java.util.List;
 
-    private String sortKey = null;
-    private int sortOrder = 0;
+public class FindOption {
+    private List<SortKey> sorting = new ArrayList<>();
     private int limit = 0;
     private int skip = 0;
 
-    public FindOption sort(final String key, final int order) {
-        this.sortKey = key;
-        this.sortOrder = order;
+    public FindOption sort(final String key, final SortOrder order) {
+        this.sorting.add(new SortKey(key, order));
         return this;
     }
 
     public FindOption sort(final String key) {
-        return this.sort(key, 1);
+        return this.sort(key, SortOrder.ASCENDANT);
     }
 
     public FindOption limit(final int limit) {
@@ -27,12 +27,8 @@ public class FindOption {
         return this;
     }
 
-    public String getSortKey() {
-        return this.sortKey;
-    }
-
-    public int getSortOrder() {
-        return this.sortOrder;
+    public List<SortKey> getSorting() {
+        return this.sorting;
     }
 
     public int getLimit() {

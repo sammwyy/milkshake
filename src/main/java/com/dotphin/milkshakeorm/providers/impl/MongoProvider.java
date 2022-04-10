@@ -6,6 +6,8 @@ import java.util.Map;
 
 import com.dotphin.milkshakeorm.providers.Provider;
 import com.dotphin.milkshakeorm.repository.FindOption;
+import com.dotphin.milkshakeorm.repository.SortKey;
+import com.dotphin.milkshakeorm.repository.SortOrder;
 import com.dotphin.milkshakeorm.utils.MapFactory;
 import com.dotphin.milkshakeorm.utils.URI;
 
@@ -69,8 +71,9 @@ public class MongoProvider implements Provider {
         final MongoCollection<Document> documents = database.getCollection(entity);
         FindIterable<Document> docsIterator = documents.find(new Document(filter));
 
-        if (options.getSortKey() != null) {
-            docsIterator.sort(new BasicDBObject(options.getSortKey(), options.getSortOrder()));
+
+        for (SortKey sort : options.getSorting()) {
+            docsIterator.sort(new BasicDBObject(sort.getKey(), sort.getType() == SortOrder.ASCENDANT ? 1 : -1));
         }
 
         if (options.getSkip() > 0) {
