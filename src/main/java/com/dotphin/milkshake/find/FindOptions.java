@@ -5,10 +5,12 @@ import java.util.List;
 
 import com.dotphin.milkshake.sorting.SortKey;
 import com.dotphin.milkshake.sorting.SortOrder;
+import com.mongodb.BasicDBObject;
+import com.mongodb.client.FindIterable;
 
 public class FindOptions {
-    private int _limit = -1;
-    private int _skip = -1;
+    private int _limit = 0;
+    private int _skip = 0;
     private List<SortKey> _sorting = new ArrayList<>();
 
     public FindOptions limit(int limit) {
@@ -40,5 +42,35 @@ public class FindOptions {
 
     public List<SortKey> getSorting() {
         return this._sorting;
+    }
+
+    public BasicDBObject getSortingAsDBO() {
+        BasicDBObject sort = null;
+
+        for (SortKey sortKey : this.getSorting()) {
+            if (sort == null) {
+                sort = new BasicDBObject(sortKey.getKey(), sortKey.getOrderValue());
+            } else {
+                sort.append(sortKey.getKey(), sortKey.getOrderValue());
+            }
+        }
+
+        return sort;
+    }
+
+    public void apply(FindIterable<?> iterable) {
+        BasicDBObject sorting = this.getSortingAsDBO();
+
+        if (sorting != null) {
+            iterable.sort(sorting);
+        }
+
+        if (this.getSkip() > 0) {
+            iterable.skip(this.getSkip());
+        }
+
+        if (this.getLimit() > 0) {
+            iterable.limit(this.getLimit());
+        }
     }
 }
