@@ -16,11 +16,23 @@
     <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
 
+  <repositories>
+    <repository>
+      <id>2lstudios-repo</id>
+      <url>https://ci.2lstudios.dev/plugin/repository/everything</url>
+    </repository>
+  </repositories>
+
   <dependencies>
     <dependency>
       <groupId>org.mongodb</groupId>
       <artifactId>mongodb-driver-sync</artifactId>
       <version>4.3.3</version>
+    </dependency>
+    <dependency>
+      <groupId>com.dotphin</groupId>
+      <artifactId>class-serializer</artifactId>
+      <version>0.0.1</version>
     </dependency>
   </dependencies>
 
