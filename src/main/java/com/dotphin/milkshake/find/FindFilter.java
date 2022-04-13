@@ -5,6 +5,7 @@ import com.mongodb.client.model.Filters;
 import org.bson.BsonDocument;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
 
 enum FindContext {
     AND, OR, NOR
@@ -106,7 +107,7 @@ public class FindFilter {
     }
 
     public FindFilter isIDEquals(String id) {
-        this.currentFilter = Filters.eq(id);
+        this.currentFilter = Filters.eq(new ObjectId(id));
         return this.calcContext();
     }
 }
