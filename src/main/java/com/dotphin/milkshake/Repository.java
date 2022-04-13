@@ -1,5 +1,7 @@
 package com.dotphin.milkshake;
 
+import java.util.Map;
+
 import org.bson.Document;
 
 public class Repository<S> {
@@ -23,5 +25,32 @@ public class Repository<S> {
         }
 
         return id;
+    }
+
+    public boolean delete(Entity entity) {
+        String id = entity.getID();
+
+        if (id != null) {
+            boolean result = this.provider.deleteByID(this.collection, id);
+            entity.setID(null);
+            return result;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean refresh(Entity entity) {
+        String id = entity.getID();
+
+        if (id != null) {
+            Map<String, Object> props = this.provider.findByID(this.collection, id);
+            
+            if (props != null) {
+                entity.injectProps(props);
+                return true;
+            }
+        }
+
+        return false;
     }
 }

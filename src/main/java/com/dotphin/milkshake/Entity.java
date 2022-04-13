@@ -13,6 +13,10 @@ public class Entity {
         return this.id;
     }
 
+    public void setID(String id) {
+        this.id = id;
+    }
+
     public Map<String, Object> getPropsAsMap() {
         return ClassSerializer.getDefaultSerializer().serialize(this);
     }
@@ -21,7 +25,23 @@ public class Entity {
         return new Document(this.getPropsAsMap());
     }
 
-    public void setID(String id) {
-        this.id = id;
+    public Repository<?> getRepository() {
+        return Milkshake.getRepository(this.getClass());
+    }
+
+    public void injectProps(Map<String, Object> props) {
+        ClassSerializer.getDefaultSerializer().deserialize(this, props);
+    }
+
+    public void delete() {
+        this.getRepository().delete(this);
+    }
+
+    public void refresh() {
+        this.getRepository().refresh(this);
+    }
+
+    public void save() {
+        this.getRepository().save(this);
     }
 }
