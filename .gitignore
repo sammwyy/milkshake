@@ -2,3 +2,5 @@ target/
 .settings
 .classpath
 .project
+
+src/main/java/com/dotphin/milkshake/tests/*.java

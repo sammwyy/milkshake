@@ -7,14 +7,20 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 enum FindContext {
-    AND, OR, NOR, NONE
+    AND, OR, NOR
 }
 
 public class FindFilter {
     private Bson filter = null;
     private Bson currentFilter = new BsonDocument();
-    private FindContext context = FindContext.NONE;
+    private FindContext context = FindContext.AND;
     private boolean is_not = false;
+
+    public FindFilter() {}
+
+    public FindFilter(String key, Object value) {
+        this.isEquals(key, value);
+    }
 
     private FindFilter calcContext() {
         if (is_not) {

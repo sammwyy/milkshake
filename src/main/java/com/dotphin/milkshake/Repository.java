@@ -65,9 +65,11 @@ public class Repository<S> {
         return false;
     }
 
-    public S propsToEntity(Document props) {
-        if (props != null) {
-            return (S) this.serializer.deserialize(this.clazz, props);
+    public S propsToEntity(Document doc) {
+        if (doc != null) {
+            S entity = (S) this.serializer.deserialize(this.clazz, doc);
+            ((Entity) entity).setID(doc.getObjectId("_id").toHexString());
+            return entity;
         } else {
             return null;
         }
@@ -78,6 +80,7 @@ public class Repository<S> {
 
         for (Document doc : props) {
             S entity = this.serializer.deserialize(this.clazz, doc);
+            ((Entity) entity).setID(doc.getObjectId("_id").toHexString());
             result.add(entity);
         }
 
