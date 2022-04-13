@@ -9,7 +9,7 @@ public class Milkshake {
     private static final Map<Class<?>, Repository<?>> repositories = new HashMap<>();
 
     public static <S> Repository<S> addRepository(Class<?> entity, Provider provider, String collection) {
-        Repository<?> repository = new Repository<>(provider, collection);
+        Repository<?> repository = new Repository<>(entity, provider, collection);
         repositories.put(entity, repository);
         return (Repository<S>) repository;
     }

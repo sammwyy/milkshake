@@ -18,6 +18,7 @@ import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.client.result.UpdateResult;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 public class Provider {
     private String databaseUri;
@@ -99,26 +100,32 @@ public class Provider {
         return this.findMany(collection, filter, null);
     }
 
-    public boolean updateOne(String collection, FindFilter filter, Document update) {
+    public boolean updateOne(String collection, FindFilter filter, Bson update) {
         MongoCollection<Document> documents = database.getCollection(collection);
         UpdateResult result = documents.updateOne(filter.build(), update);
         return result.getModifiedCount() > 0;
     }
 
-    public boolean updateByID(String collection, String id, Document update) {
+    public boolean updateOne(String collection, FindFilter filter, Operation update) {
+        return this.updateOne(collection, filter, update.build());
+    }
+
+    public boolean updateByID(String collection, String id, Bson update) {
         return this.updateOne(collection, new FindFilter().isIDEquals(id), update);
     }
 
-    public long updateMany(String collection, FindFilter filter, Document update) {
+    public boolean updateByID(String collection, String id, Operation update) {
+        return this.updateByID(collection, id, update.build());
+    }
+
+    public long updateMany(String collection, FindFilter filter, Bson update) {
         MongoCollection<Document> documents = database.getCollection(collection);
-        UpdateResult result = documents.updateMany(filter.build(), new Document("$set", update));
+        UpdateResult result = documents.updateMany(filter.build(), update);
         return result.getModifiedCount();
     }
 
-    public long updateMany(String collection, FindFilter filter, Operation operation) {
-        MongoCollection<Document> documents = database.getCollection(collection);
-        UpdateResult result = documents.updateMany(filter.build(), operation.build());
-        return result.getModifiedCount();
+    public long updateMany(String collection, FindFilter filter, Operation update) {
+        return this.updateMany(collection, filter, update.build());
     }
 
     public boolean deleteOne(String collection, FindFilter filter) {
