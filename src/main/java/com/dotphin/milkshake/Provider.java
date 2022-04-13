@@ -2,7 +2,6 @@ package com.dotphin.milkshake;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.dotphin.milkshake.find.FindFilter;
 import com.dotphin.milkshake.find.FindOptions;
@@ -21,20 +20,6 @@ import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 
 public class Provider {
-    private static Map<String, Provider> cachedProviders;
-
-    public static Provider connect(String uri) {
-        Provider provider = cachedProviders.get(uri);
-
-        if (provider == null) {
-            provider = new Provider(uri);
-            cachedProviders.put(uri, provider);
-        }
-
-        provider.addConnection();
-        return provider;
-    }
-
     private String databaseUri;
     private int connections = 0;
     private boolean active = false;
@@ -62,16 +47,16 @@ public class Provider {
 
     public void close() {
         this.connections--;
-
+        
         if (this.connections == 0) {
             if (this.client != null) {
                 this.client.close();
             }
-
+    
             this.client = null;
             this.database = null;
             this.active = false;
-            Provider.cachedProviders.remove(this.databaseUri);
+            Milkshake.providers.remove(this.databaseUri);
         }
     }
 
