@@ -4,7 +4,7 @@
 
   <groupId>com.dotphin</groupId>
   <artifactId>milkshake-orm</artifactId>
-  <version>1.0</version>
+  <version>1.0.1</version>
 
   <name>milkshake-orm</name>
   <!-- FIXME change it to the project's website -->
