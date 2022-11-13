@@ -4,7 +4,7 @@
 
   <groupId>com.dotphin</groupId>
   <artifactId>milkshake-odm</artifactId>
-  <version>1.0.1</version>
+  <version>1.1.0</version>
 
   <name>milkshake-odm</name>
   <!-- FIXME change it to the project's website -->
@@ -27,17 +27,22 @@
     <dependency>
       <groupId>org.mongodb</groupId>
       <artifactId>mongodb-driver-sync</artifactId>
-      <version>4.3.3</version>
+      <version>4.7.1</version>
     </dependency>
     <dependency>
       <groupId>com.dotphin</groupId>
       <artifactId>class-serializer</artifactId>
-      <version>0.0.4</version>
+      <version>0.0.5</version>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.2</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>5.9.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.9.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

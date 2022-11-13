@@ -28,13 +28,13 @@ public class Provider {
     private MongoClient client;
     private MongoDatabase database;
 
-    protected Provider (String databaseUri) {
+    protected Provider(String databaseUri) {
         ConnectionString uri = new ConnectionString(databaseUri);
         MongoClientSettings settings = MongoClientSettings.builder()
-            .applyConnectionString(uri)
-            .retryWrites(true)
-            .retryReads(true)
-            .build();
+                .applyConnectionString(uri)
+                .retryWrites(true)
+                .retryReads(true)
+                .build();
 
         this.client = MongoClients.create(settings);
         this.database = this.client.getDatabase(uri.getDatabase());
@@ -48,12 +48,12 @@ public class Provider {
 
     public void close() {
         this.connections--;
-        
+
         if (this.connections == 0) {
             if (this.client != null) {
                 this.client.close();
             }
-    
+
             this.client = null;
             this.database = null;
             this.active = false;
@@ -84,7 +84,7 @@ public class Provider {
     public List<Document> findMany(String collection, FindFilter filter, FindOptions options) {
         MongoCollection<Document> documents = database.getCollection(collection);
         FindIterable<Document> iterator = documents.find(filter.build());
-        
+
         if (options != null) {
             options.apply(iterator);
         }
