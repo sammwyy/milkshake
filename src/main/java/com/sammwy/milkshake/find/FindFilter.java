@@ -1,4 +1,4 @@
-package com.dotphin.milkshake.find;
+package com.sammwy.milkshake.find;
 
 import com.mongodb.client.model.Filters;
 
@@ -17,7 +17,8 @@ public class FindFilter {
     private FindContext context = FindContext.AND;
     private boolean is_not = false;
 
-    public FindFilter() {}
+    public FindFilter() {
+    }
 
     public FindFilter(String key, Object value) {
         this.isEquals(key, value);
@@ -30,7 +31,7 @@ public class FindFilter {
         }
 
         if (filter == null) {
-            filter = currentFilter; 
+            filter = currentFilter;
         } else if (context == FindContext.AND) {
             filter = Filters.and(filter, currentFilter);
         } else if (context == FindContext.OR) {

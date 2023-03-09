@@ -1,8 +1,8 @@
-package com.dotphin.milkshake;
+package com.sammwy.milkshake;
 
 import java.util.Map;
 
-import com.dotphin.classserializer.ClassSerializer;
+import com.sammwy.classserializer.ClassSerializer;
 
 import org.bson.Document;
 

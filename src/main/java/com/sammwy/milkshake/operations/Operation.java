@@ -1,4 +1,4 @@
-package com.dotphin.milkshake.operations;
+package com.sammwy.milkshake.operations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,7 @@ import org.bson.conversions.Bson;
 
 public class Operation {
     private List<Bson> updates;
-    
+
     public Operation() {
         this.updates = new ArrayList<>();
     }

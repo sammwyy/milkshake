@@ -1,4 +1,4 @@
-package com.dotphin.milkshake.tests;
+package com.sammwy.milkshake.tests;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Order;
@@ -9,12 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.dotphin.milkshake.Milkshake;
-import com.dotphin.milkshake.Provider;
-import com.dotphin.milkshake.Repository;
-import com.dotphin.milkshake.entities.User;
-import com.dotphin.milkshake.find.FindFilter;
-import com.dotphin.milkshake.operations.Operation;
+import com.sammwy.milkshake.entities.User;
+import com.sammwy.milkshake.Milkshake;
+import com.sammwy.milkshake.Provider;
+import com.sammwy.milkshake.Repository;
+import com.sammwy.milkshake.find.FindFilter;
+import com.sammwy.milkshake.operations.Operation;
 
 @TestMethodOrder(OrderAnnotation.class)
 public class OperationTest {

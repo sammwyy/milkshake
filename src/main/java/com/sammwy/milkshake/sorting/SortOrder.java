@@ -1,4 +1,4 @@
-package com.dotphin.milkshake.sorting;
+package com.sammwy.milkshake.sorting;
 
 public enum SortOrder {
     ASCENDANT(1), DESCENDANT(-1);

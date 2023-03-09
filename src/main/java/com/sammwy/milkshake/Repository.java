@@ -1,12 +1,12 @@
-package com.dotphin.milkshake;
+package com.sammwy.milkshake;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.dotphin.classserializer.ClassSerializer;
-import com.dotphin.milkshake.find.FindFilter;
-import com.dotphin.milkshake.find.FindOptions;
-import com.dotphin.milkshake.operations.Operation;
+import com.sammwy.classserializer.ClassSerializer;
+import com.sammwy.milkshake.find.FindFilter;
+import com.sammwy.milkshake.find.FindOptions;
+import com.sammwy.milkshake.operations.Operation;
 
 import org.bson.Document;
 
@@ -55,7 +55,7 @@ public class Repository<S> {
 
         if (id != null) {
             Document props = this.provider.findByID(this.collection, id);
-            
+
             if (props != null) {
                 entity.injectProps(props);
                 return true;
@@ -89,26 +89,22 @@ public class Repository<S> {
 
     public S findOne(FindFilter filter) {
         return this.propsToEntity(
-            this.provider.findOne(collection, filter)
-        );
+                this.provider.findOne(collection, filter));
     }
 
     public S findByID(String id) {
         return this.propsToEntity(
-            this.provider.findByID(collection, id)
-        );
+                this.provider.findByID(collection, id));
     }
 
     public List<S> findMany(FindFilter filter, FindOptions options) {
         return this.propsToEntities(
-            this.provider.findMany(collection, filter, options)
-        );
+                this.provider.findMany(collection, filter, options));
     }
 
     public List<S> findMany(FindFilter filter) {
         return this.propsToEntities(
-            this.provider.findMany(collection, filter)
-        );
+                this.provider.findMany(collection, filter));
     }
 
     public boolean updateOne(FindFilter filter, Operation update) {

@@ -1,12 +1,12 @@
-package com.dotphin.milkshake.find;
+package com.sammwy.milkshake.find;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.dotphin.milkshake.sorting.SortKey;
-import com.dotphin.milkshake.sorting.SortOrder;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
+import com.sammwy.milkshake.sorting.SortKey;
+import com.sammwy.milkshake.sorting.SortOrder;
 
 public class FindOptions {
     private int _limit = 0;

@@ -1,4 +1,4 @@
-package com.dotphin.milkshake.sorting;
+package com.sammwy.milkshake.sorting;
 
 public class SortKey {
     private String key;

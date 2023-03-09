@@ -1,4 +1,4 @@
-package com.dotphin.milkshake;
+package com.sammwy.milkshake;
 
 import java.util.HashMap;
 import java.util.Map;

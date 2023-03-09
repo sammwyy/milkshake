@@ -1,11 +1,8 @@
-package com.dotphin.milkshake;
+package com.sammwy.milkshake;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.dotphin.milkshake.find.FindFilter;
-import com.dotphin.milkshake.find.FindOptions;
-import com.dotphin.milkshake.operations.Operation;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.FindIterable;
@@ -16,6 +13,9 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.client.result.UpdateResult;
+import com.sammwy.milkshake.find.FindFilter;
+import com.sammwy.milkshake.find.FindOptions;
+import com.sammwy.milkshake.operations.Operation;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;

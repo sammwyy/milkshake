@@ -1,10 +1,10 @@
 <div align="center">
-  <img src="https://github.com/dotphin/MilkshakeORM/raw/main/docs/assets/icon128.png" width="78px" alt="Milkshake Logo" />
-  <h1>MilkshakeODM</h1>
+  <img src="https://github.com/sammwyy/milkshake/raw/main/docs/assets/icon128.png" width="78px" alt="Milkshake Logo" />
+  <h1>Milkshake</h1>
   <p>MongoDB ORM/ODM for Java.</p>
 </div>
 
-## What is MilkshakeORM?
+## What is Milkshake?
 
 Several of our projects use databases to persist data over time. It is very common that we use several or it also depends on the comfort of the client and that is why using the direct drivers to connect to this is very tedious, especially when adapting the different types of databases to the application and that everything will work as it should.
 
@@ -12,11 +12,11 @@ That is why we have created MilkshakeODM which imposes a single way to manipulat
 
 ## Helpful Resources
 
-- [Bug Report](https://github.com/dotphin/milkshake-odm/issues/)
-- [Documentation](https://github.com/dotphin/milkshake-odm/wiki)
-- [Donate](https://paypal.me/sammwy)
+- [Bug Report](https://github.com/sammwyy/milkshake-odm/issues/)
+- [Documentation](https://github.com/sammwyy/milkshake-odm/wiki)
+- [Donate](https://paypal.me/2lstudios)
 - [Dev Twitter](https://twitter.com/sammwy)
-- [Website](https://dotphin.com/milkshake)
+- [Website](https://sammwy.com/milkshake)
 
 ## ToDo List
 
