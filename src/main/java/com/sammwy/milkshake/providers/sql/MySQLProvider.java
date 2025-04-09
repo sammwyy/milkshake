@@ -1,6 +1,5 @@
 package com.sammwy.milkshake.providers.sql;
 
-import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,9 +11,6 @@ import java.util.Map;
 
 import com.sammwy.milkshake.ProviderInfo;
 import com.sammwy.milkshake.ProviderInfo.Options;
-import com.sammwy.milkshake.Schema;
-import com.sammwy.milkshake.annotations.SchemaType;
-import com.sammwy.milkshake.utils.ReflectionUtils;
 
 public class MySQLProvider extends SQLProvider {
     @Override
@@ -111,63 +107,6 @@ public class MySQLProvider extends SQLProvider {
         }
     }
 
-    @Override
-    public <T extends Schema> boolean initialize(Class<T> schemaClass) {
-        SchemaType schemaTypeAnnotation = schemaClass.getAnnotation(SchemaType.class);
-        if (schemaTypeAnnotation == null) {
-            throw new RuntimeException("Schema class " + schemaClass.getName() + " is missing @SchemaType annotation");
-        }
-
-        String tableName = schemaTypeAnnotation.value();
-        if (tableName == null || tableName.trim().isEmpty()) {
-            throw new RuntimeException(
-                    "Schema class " + schemaClass.getName() + " has empty table name in @SchemaType");
-        }
-
-        try {
-            // Check if table already exists
-            if (tableExists(tableName)) {
-                return true;
-            }
-
-            // Build CREATE TABLE statement
-            StringBuilder createTableSQL = new StringBuilder();
-            createTableSQL.append("CREATE TABLE IF NOT EXISTS ").append(escapeIdentifier(tableName)).append(" (");
-            createTableSQL.append("`_id` VARCHAR(255) PRIMARY KEY");
-
-            List<Field> fields = ReflectionUtils.getPropFields(schemaClass);
-            for (Field field : fields) {
-                String fieldName = field.getName();
-
-                // Skip the id field as we've already added it
-                if (fieldName.equals("id"))
-                    continue;
-
-                // Skip transient or static fields
-                if (java.lang.reflect.Modifier.isTransient(field.getModifiers()))
-                    continue;
-                if (java.lang.reflect.Modifier.isStatic(field.getModifiers()))
-                    continue;
-                if (fieldName.equals("cachedFields"))
-                    continue;
-
-                String sqlType = SQLUtils.getSQLType(field.getType(), false);
-                if (sqlType != null) {
-                    createTableSQL.append(", ").append(escapeIdentifier(fieldName)).append(" ").append(sqlType);
-                }
-            }
-
-            createTableSQL.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
-            try (Statement stmt = connection.createStatement()) {
-                stmt.execute(createTableSQL.toString());
-                return true;
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to initialize table for " + schemaClass.getName(), e);
-        }
-    }
-
     /**
      * Check if a table exists in the MySQL database.
      *
@@ -175,6 +114,7 @@ public class MySQLProvider extends SQLProvider {
      * @return true if the table exists
      * @throws SQLException if a database error occurs
      */
+    @Override
     public boolean tableExists(String tableName) throws SQLException {
         String sql = "SELECT 1 FROM information_schema.tables WHERE table_schema = ? AND table_name = ? LIMIT 1";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -184,6 +124,11 @@ public class MySQLProvider extends SQLProvider {
                 return rs.next();
             }
         }
+    }
+
+    @Override
+    public boolean isSQLite() {
+        return false;
     }
 
 }

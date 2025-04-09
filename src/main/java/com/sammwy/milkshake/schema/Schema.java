@@ -1,9 +1,11 @@
-package com.sammwy.milkshake;
+package com.sammwy.milkshake.schema;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import com.sammwy.milkshake.Repository;
+import com.sammwy.milkshake.RepositoryCache;
 import com.sammwy.milkshake.utils.ReflectionUtils;
 
 /**

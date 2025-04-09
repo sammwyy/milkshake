@@ -27,12 +27,15 @@ public class MongoDBTests {
     private static Repository<UserSchema> repository;
     private static String id;
 
+    // private static Repository<EmbeddedSchema> embeddedRepository;
+
     @BeforeAll
     public static void setup() {
         System.out.println("Setting up MongoProvider...");
         Provider provider = new MongoProvider();
         provider.connect(new ProviderInfo("mongodb://localhost/milkshake-test"));
         repository = provider.addRepository(UserSchema.class);
+        // embeddedRepository = provider.addRepository(EmbeddedSchema.class);
     }
 
     @AfterAll
@@ -108,4 +111,32 @@ public class MongoDBTests {
             u.delete(); // Clean up
         }
     }
+
+    /**
+     * @Test
+     *       @Order(6)
+     *       public void testEmbedded() {
+     *       EmbeddedSchema entity = new EmbeddedSchema();
+     *       entity.single = "Hello World";
+     *       entity.embedded = new EmbeddedObject();
+     *       entity.embedded.child = "Child";
+     *       entity.embedded.foo = 12345;
+     *       entity.embedded.hello = true;
+     * 
+     *       boolean saved = entity.save();
+     *       assertTrue(saved, "Entity should be saved");
+     * 
+     *       EmbeddedSchema result = embeddedRepository.findById(entity.getId());
+     *       assertNotNull(result, "Entity should be found by ID");
+     * 
+     *       assertEquals(entity.single, result.single, "Single field should
+     *       match");
+     *       assertEquals(entity.embedded.child, result.embedded.child, "Child field
+     *       should match");
+     *       assertEquals(entity.embedded.foo, result.embedded.foo, "Foo field
+     *       should match");
+     *       assertEquals(entity.embedded.hello, result.embedded.hello, "Hello field
+     *       should match");
+     *       }
+     */
 }

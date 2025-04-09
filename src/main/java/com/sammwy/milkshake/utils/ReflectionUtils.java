@@ -6,10 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.sammwy.milkshake.Schema;
 import com.sammwy.milkshake.annotations.ID;
 import com.sammwy.milkshake.annotations.Prop;
 import com.sammwy.milkshake.annotations.SchemaType;
+import com.sammwy.milkshake.schema.Schema;
 
 /**
  * Utility class for working with reflection and annotations in the Milkshake

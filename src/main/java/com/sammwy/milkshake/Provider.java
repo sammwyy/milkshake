@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sammwy.milkshake.query.Filter;
+import com.sammwy.milkshake.schema.Schema;
 
 /**
  * Defines the core database operations for the Milkshake ORM.
@@ -15,12 +16,18 @@ import com.sammwy.milkshake.query.Filter;
 public interface Provider {
 
     /**
+     * Return whether the provider supports embedded databases
+     * 
+     * @return true if the provider supports embedded databases
+     */
+    public boolean supportsEmbedded();
+
+    /**
      * Establishes a connection to the database using the provided connection
      * information.
      * 
      * @param info The connection configuration containing credentials and server
      *             details
-     * @throws DatabaseConnectionException if the connection cannot be established
      */
     public void connect(ProviderInfo info);
 

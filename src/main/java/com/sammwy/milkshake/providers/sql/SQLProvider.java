@@ -1,5 +1,6 @@
 package com.sammwy.milkshake.providers.sql;
 
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -19,9 +20,11 @@ import com.sammwy.milkshake.Provider;
 import com.sammwy.milkshake.ProviderInfo;
 import com.sammwy.milkshake.Repository;
 import com.sammwy.milkshake.RepositoryCache;
-import com.sammwy.milkshake.Schema;
+import com.sammwy.milkshake.annotations.SchemaType;
 import com.sammwy.milkshake.query.Filter.Find;
 import com.sammwy.milkshake.query.Filter.Update;
+import com.sammwy.milkshake.schema.Schema;
+import com.sammwy.milkshake.utils.ReflectionUtils;
 
 public abstract class SQLProvider implements Provider {
     protected Connection connection;
@@ -33,6 +36,11 @@ public abstract class SQLProvider implements Provider {
     protected abstract void setupConnection(Connection connection) throws SQLException;
 
     protected abstract String escapeIdentifier(String identifier);
+
+    @Override
+    public boolean supportsEmbedded() {
+        return true;
+    }
 
     @Override
     public void connect(ProviderInfo info) {
@@ -343,4 +351,89 @@ public abstract class SQLProvider implements Provider {
             return Arrays.stream(results).sum();
         }
     }
+
+    /**
+     * Initializes the database table for a Schema class.
+     * This method analyzes the fields in the Schema class and creates
+     * the corresponding SQLite table if it doesn't exist.
+     *
+     * @param <T>         The type of Schema
+     * @param schemaClass The Schema class to initialize a table for
+     * @return true if initialization was successful
+     */
+    public <T extends Schema> boolean initialize(Class<T> schemaClass) {
+        SchemaType schemaType = schemaClass.getAnnotation(SchemaType.class);
+        if (schemaType == null) {
+            throw new RuntimeException("Schema class " + schemaClass.getName() + " is missing @SchemaType annotation");
+        }
+
+        String tableName = schemaType.value();
+        if (tableName == null || tableName.trim().isEmpty()) {
+            tableName = schemaClass.getSimpleName();
+        }
+
+        try {
+            // Check if table already exists
+            if (tableExists(tableName)) {
+                return true;
+            }
+
+            // Build CREATE TABLE statement
+            StringBuilder createTableSQL = new StringBuilder();
+            createTableSQL.append("CREATE TABLE IF NOT EXISTS ").append(tableName).append(" (");
+
+            if (this.isSQLite()) {
+                createTableSQL.append("_id TEXT PRIMARY KEY");
+            } else {
+                createTableSQL.append("`_id` VARCHAR(255) PRIMARY KEY");
+            }
+
+            // Get all fields from the schema class including parent classes
+            List<Field> fields = ReflectionUtils.getPropFields(schemaClass);
+            for (Field field : fields) {
+                // Skip the id field as we've already added it
+                if (field.getName().equals("id")) {
+                    continue;
+                }
+
+                // Skip transient fields
+                if (java.lang.reflect.Modifier.isTransient(field.getModifiers())) {
+                    continue;
+                }
+
+                // Skip static fields
+                if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+                    continue;
+                }
+
+                // Skip the cachedFields map
+                if (field.getName().equals("cachedFields")) {
+                    continue;
+                }
+
+                String sqlType = SQLUtils.getSQLType(field.getType(), this.isSQLite());
+                if (sqlType != null) {
+                    createTableSQL.append(", ").append(field.getName()).append(" ").append(sqlType);
+                }
+            }
+
+            if (this.isSQLite()) {
+                createTableSQL.append(")");
+            } else {
+                createTableSQL.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+            }
+
+            // Execute CREATE TABLE statement
+            try (Statement stmt = connection.createStatement()) {
+                stmt.execute(createTableSQL.toString());
+                return true;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to initialize table for " + schemaClass.getName(), e);
+        }
+    }
+
+    public abstract boolean tableExists(String tableName) throws SQLException;
+
+    public abstract boolean isSQLite();
 }

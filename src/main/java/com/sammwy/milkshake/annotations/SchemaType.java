@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.sammwy.milkshake.Schema;
+import com.sammwy.milkshake.schema.Schema;
 
 /**
  * Specifies the collection name for a schema class in the database.

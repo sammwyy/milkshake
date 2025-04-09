@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sammwy.milkshake.query.Filter;
+import com.sammwy.milkshake.schema.Schema;
 import com.sammwy.milkshake.utils.ReflectionUtils;
 import com.sammwy.milkshake.utils.SchemaUtils;
 
@@ -41,6 +42,16 @@ public class Repository<T extends Schema> {
      */
     public String getCollectionName() {
         return ReflectionUtils.getCollectionName(this.schemaClass);
+    }
+
+    /**
+     * Determines if embedded document serialization should use prefixes
+     * 
+     * @return true if prefixes should be used (SQL databases), false for nested
+     *         documents (MongoDB)
+     */
+    private boolean shouldUsePrefix() {
+        return !provider.supportsEmbedded();
     }
 
     /**
@@ -187,5 +198,14 @@ public class Repository<T extends Schema> {
      */
     public boolean deleteOne(Filter.Find filter) {
         return provider.deleteOne(getCollectionName(), filter);
+    }
+
+    /**
+     * Gets the database provider for this repository.
+     *
+     * @return The database provider
+     */
+    public Provider getProvider() {
+        return provider;
     }
 }

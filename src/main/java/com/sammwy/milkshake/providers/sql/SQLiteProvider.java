@@ -1,20 +1,15 @@
 package com.sammwy.milkshake.providers.sql;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 import java.util.Map;
 
 import com.sammwy.milkshake.ProviderInfo;
-import com.sammwy.milkshake.Schema;
-import com.sammwy.milkshake.annotations.SchemaType;
 import com.sammwy.milkshake.query.Filter.Update;
-import com.sammwy.milkshake.utils.ReflectionUtils;
 
 public class SQLiteProvider extends SQLProvider {
     public SQLiteProvider open(File file) {
@@ -86,86 +81,13 @@ public class SQLiteProvider extends SQLProvider {
     }
 
     /**
-     * Initializes the database table for a Schema class.
-     * This method analyzes the fields in the Schema class and creates
-     * the corresponding SQLite table if it doesn't exist.
-     *
-     * @param <T>         The type of Schema
-     * @param schemaClass The Schema class to initialize a table for
-     * @return true if initialization was successful
-     */
-    @Override
-    public <T extends Schema> boolean initialize(Class<T> schemaClass) {
-        SchemaType schemaTypeAnnotation = schemaClass.getAnnotation(SchemaType.class);
-        if (schemaTypeAnnotation == null) {
-            throw new RuntimeException("Schema class " + schemaClass.getName() + " is missing @SchemaType annotation");
-        }
-
-        String tableName = schemaTypeAnnotation.value();
-        if (tableName == null || tableName.trim().isEmpty()) {
-            throw new RuntimeException(
-                    "Schema class " + schemaClass.getName() + " has empty table name in @SchemaType");
-        }
-
-        try {
-            // Check if table already exists
-            if (tableExists(tableName)) {
-                return true;
-            }
-
-            // Build CREATE TABLE statement
-            StringBuilder createTableSQL = new StringBuilder();
-            createTableSQL.append("CREATE TABLE IF NOT EXISTS ").append(tableName).append(" (");
-            createTableSQL.append("_id TEXT PRIMARY KEY");
-
-            // Get all fields from the schema class including parent classes
-            List<Field> fields = ReflectionUtils.getPropFields(schemaClass);
-            for (Field field : fields) {
-                // Skip the id field as we've already added it
-                if (field.getName().equals("id")) {
-                    continue;
-                }
-
-                // Skip transient fields
-                if (java.lang.reflect.Modifier.isTransient(field.getModifiers())) {
-                    continue;
-                }
-
-                // Skip static fields
-                if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
-                    continue;
-                }
-
-                // Skip the cachedFields map
-                if (field.getName().equals("cachedFields")) {
-                    continue;
-                }
-
-                String sqlType = SQLUtils.getSQLType(field.getType(), true);
-                if (sqlType != null) {
-                    createTableSQL.append(", ").append(field.getName()).append(" ").append(sqlType);
-                }
-            }
-
-            createTableSQL.append(")");
-
-            // Execute CREATE TABLE statement
-            try (Statement stmt = connection.createStatement()) {
-                stmt.execute(createTableSQL.toString());
-                return true;
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to initialize table for " + schemaClass.getName(), e);
-        }
-    }
-
-    /**
      * Check if a table exists in the SQLite database
      * 
      * @param tableName The name of the table to check
      * @return true if the table exists
      * @throws SQLException if a database error occurs
      */
+    @Override
     public boolean tableExists(String tableName) throws SQLException {
         String sql = "SELECT name FROM sqlite_master WHERE type='table' AND name=?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -175,4 +97,10 @@ public class SQLiteProvider extends SQLProvider {
             }
         }
     }
+
+    @Override
+    public boolean isSQLite() {
+        return true;
+    }
+
 }

@@ -3,6 +3,8 @@ package com.sammwy.milkshake;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sammwy.milkshake.schema.Schema;
+
 /**
  * A caching mechanism for storing and retrieving Repository instances
  * associated with Schema classes.

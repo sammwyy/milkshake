@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.sammwy.milkshake.Schema;
+import com.sammwy.milkshake.schema.Schema;
 
 /**
  * Marks a field as the unique identifier for a document in the database.

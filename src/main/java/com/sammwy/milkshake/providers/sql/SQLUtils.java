@@ -12,7 +12,9 @@ import com.sammwy.milkshake.query.Filter;
  * Provides translation between the ORM's query abstraction and native SQL
  * operations.
  */
-public class SQLUtils {
+public final class SQLUtils {
+    private SQLUtils() {
+    }
 
     /**
      * Builds a WHERE clause from a Find filter.

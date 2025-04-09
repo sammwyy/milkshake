@@ -1,8 +1,8 @@
 package com.sammwy.milkshake.schemas;
 
-import com.sammwy.milkshake.Schema;
 import com.sammwy.milkshake.annotations.Prop;
 import com.sammwy.milkshake.annotations.SchemaType;
+import com.sammwy.milkshake.schema.Schema;
 
 @SchemaType("Users")
 public class UserSchema extends Schema {

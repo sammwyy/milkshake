@@ -18,12 +18,22 @@ import com.sammwy.milkshake.Provider;
 import com.sammwy.milkshake.ProviderInfo;
 import com.sammwy.milkshake.Repository;
 import com.sammwy.milkshake.RepositoryCache;
-import com.sammwy.milkshake.Schema;
 import com.sammwy.milkshake.query.Filter;
+import com.sammwy.milkshake.schema.Schema;
 
 public class MongoProvider implements Provider {
     private MongoClient client;
     private MongoDatabase database;
+
+    @Override
+    public <T extends Schema> boolean initialize(Class<T> schemaClass) {
+        return true;
+    }
+
+    @Override
+    public boolean supportsEmbedded() {
+        return true;
+    }
 
     @Override
     public void connect(ProviderInfo info) {
@@ -128,10 +138,5 @@ public class MongoProvider implements Provider {
         Repository<T> repo = new Repository<>(this, schemaClass);
         RepositoryCache.cache(schemaClass, repo);
         return repo;
-    }
-
-    @Override
-    public <T extends Schema> boolean initialize(Class<T> schemaClass) {
-        return true;
     }
 }
