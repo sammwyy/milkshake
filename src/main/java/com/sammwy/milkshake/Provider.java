@@ -1,146 +1,149 @@
 package com.sammwy.milkshake;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import com.mongodb.ConnectionString;
-import com.mongodb.MongoClientSettings;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.result.DeleteResult;
-import com.mongodb.client.result.InsertOneResult;
-import com.mongodb.client.result.UpdateResult;
-import com.sammwy.milkshake.find.FindFilter;
-import com.sammwy.milkshake.find.FindOptions;
-import com.sammwy.milkshake.operations.Operation;
+import com.sammwy.milkshake.query.Filter;
 
-import org.bson.Document;
-import org.bson.conversions.Bson;
+/**
+ * Defines the core database operations for the Milkshake ORM.
+ * This interface serves as an abstraction layer for different database
+ * backends,
+ * providing CRUD (Create, Read, Update, Delete) operations and repository
+ * management.
+ */
+public interface Provider {
 
-public class Provider {
-    private String databaseUri;
-    private int connections = 0;
-    private boolean active = false;
+    /**
+     * Establishes a connection to the database using the provided connection
+     * information.
+     * 
+     * @param info The connection configuration containing credentials and server
+     *             details
+     * @throws DatabaseConnectionException if the connection cannot be established
+     */
+    public void connect(ProviderInfo info);
 
-    private MongoClient client;
-    private MongoDatabase database;
+    /**
+     * Inserts a single document into the specified collection.
+     * 
+     * @param collection The name of the collection to insert into
+     * @param data       The document data as key-value pairs
+     * @return true if the insertion was successful, false otherwise
+     */
+    boolean insert(String collection, Map<String, Object> data);
 
-    protected Provider(String databaseUri) {
-        ConnectionString uri = new ConnectionString(databaseUri);
-        MongoClientSettings settings = MongoClientSettings.builder()
-                .applyConnectionString(uri)
-                .retryWrites(true)
-                .retryReads(true)
-                .build();
+    /**
+     * Inserts multiple documents into the specified collection in a single
+     * operation.
+     * 
+     * @param collection The name of the collection to insert into
+     * @param dataList   The list of documents to insert
+     * @return The number of successfully inserted documents
+     */
+    int insertMany(String collection, List<Map<String, Object>> dataList);
 
-        this.client = MongoClients.create(settings);
-        this.database = this.client.getDatabase(uri.getDatabase());
-        this.databaseUri = databaseUri;
-        this.active = true;
-    }
+    /**
+     * Performs an upsert (insert or update if exists) operation for a single
+     * document.
+     * 
+     * @param collection The name of the collection
+     * @param data       The document data including identifier fields
+     * @return true if the operation was successful, false otherwise
+     */
+    boolean upsert(String collection, Map<String, Object> data);
 
-    protected void addConnection() {
-        this.connections++;
-    }
+    /**
+     * Finds all documents matching the specified criteria in the collection.
+     * 
+     * @param collection The name of the collection to query
+     * @param criteria   The search criteria as key-value pairs
+     * @return A list of matching documents, or empty list if none found
+     */
+    List<Map<String, Object>> find(String collection, Filter.Find criteria);
 
-    public void close() {
-        this.connections--;
+    /**
+     * Finds a single document matching the specified criteria in the collection.
+     * 
+     * @param collection The name of the collection to query
+     * @param criteria   The search criteria as key-value pairs
+     * @return The first matching document, or null if none found
+     */
+    Map<String, Object> findOne(String collection, Filter.Find criteria);
 
-        if (this.connections == 0) {
-            if (this.client != null) {
-                this.client.close();
-            }
+    /**
+     * Finds a document by its unique identifier in the collection.
+     * 
+     * @param collection The name of the collection to query
+     * @param id         The unique identifier of the document
+     * @return The matching document, or null if not found
+     */
+    Map<String, Object> findById(String collection, String id);
 
-            this.client = null;
-            this.database = null;
-            this.active = false;
-            Milkshake.providers.remove(this.databaseUri);
-        }
-    }
+    /**
+     * Updates all documents matching the specified criteria in the collection.
+     * 
+     * @param collection The name of the collection to update
+     * @param criteria   The selection criteria as key-value pairs
+     * @param update     The update operations as key-value pairs
+     * @return The number of documents modified
+     */
+    int update(String collection, Filter.Find criteria, Filter.Update update);
 
-    public boolean isActive() {
-        return this.active;
-    }
+    /**
+     * Updates a single document by its unique identifier in the collection.
+     * 
+     * @param collection The name of the collection to update
+     * @param id         The unique identifier of the document to update
+     * @param update     The update operations as key-value pairs
+     * @return true if the document was found and updated, false otherwise
+     */
+    boolean updateByID(String collection, String id, Filter.Update update);
 
-    public String create(String collection, Document props) {
-        MongoCollection<Document> documents = database.getCollection(collection);
-        InsertOneResult result = documents.insertOne(props);
-        return result.getInsertedId().asObjectId().getValue().toHexString();
-    }
+    /**
+     * Updates the first document matching the specified criteria in the collection.
+     * 
+     * @param collection The name of the collection to update
+     * @param criteria   The selection criteria as key-value pairs
+     * @param update     The update operations as key-value pairs
+     * @return true if a document was found and updated, false otherwise
+     */
+    boolean updateOne(String collection, Filter.Find criteria, Filter.Update update);
 
-    public Document findOne(String collection, FindFilter filter) {
-        MongoCollection<Document> documents = database.getCollection(collection);
-        Document doc = documents.find(filter.build()).first();
-        return doc;
-    }
+    /**
+     * Deletes all documents matching the specified criteria from the collection.
+     * 
+     * @param collection The name of the collection to delete from
+     * @param criteria   The selection criteria as key-value pairs
+     * @return The number of documents deleted
+     */
+    int delete(String collection, Filter.Find criteria);
 
-    public Document findByID(String collection, String id) {
-        return this.findOne(collection, new FindFilter().isIDEquals(id));
-    }
+    /**
+     * Deletes a single document by its unique identifier from the collection.
+     * 
+     * @param collection The name of the collection to delete from
+     * @param id         The unique identifier of the document to delete
+     * @return true if the document was found and deleted, false otherwise
+     */
+    boolean deleteByID(String collection, String id);
 
-    public List<Document> findMany(String collection, FindFilter filter, FindOptions options) {
-        MongoCollection<Document> documents = database.getCollection(collection);
-        FindIterable<Document> iterator = documents.find(filter.build());
+    /**
+     * Deletes the first document matching the specified criteria from the
+     * collection.
+     * 
+     * @param collection The name of the collection to delete from
+     * @param criteria   The selection criteria as key-value pairs
+     * @return true if a document was found and deleted, false otherwise
+     */
+    boolean deleteOne(String collection, Filter.Find criteria);
 
-        if (options != null) {
-            options.apply(iterator);
-        }
-
-        List<Document> result = new ArrayList<>();
-        iterator.forEach((document) -> {
-            result.add(document);
-        });
-        return result;
-    }
-
-    public List<Document> findMany(String collection, FindFilter filter) {
-        return this.findMany(collection, filter, null);
-    }
-
-    public boolean updateOne(String collection, FindFilter filter, Bson update) {
-        MongoCollection<Document> documents = database.getCollection(collection);
-        UpdateResult result = documents.updateOne(filter.build(), update);
-        return result.getModifiedCount() > 0;
-    }
-
-    public boolean updateOne(String collection, FindFilter filter, Operation update) {
-        return this.updateOne(collection, filter, update.build());
-    }
-
-    public boolean updateByID(String collection, String id, Bson update) {
-        return this.updateOne(collection, new FindFilter().isIDEquals(id), update);
-    }
-
-    public boolean updateByID(String collection, String id, Operation update) {
-        return this.updateByID(collection, id, update.build());
-    }
-
-    public long updateMany(String collection, FindFilter filter, Bson update) {
-        MongoCollection<Document> documents = database.getCollection(collection);
-        UpdateResult result = documents.updateMany(filter.build(), update);
-        return result.getModifiedCount();
-    }
-
-    public long updateMany(String collection, FindFilter filter, Operation update) {
-        return this.updateMany(collection, filter, update.build());
-    }
-
-    public boolean deleteOne(String collection, FindFilter filter) {
-        MongoCollection<Document> documents = database.getCollection(collection);
-        DeleteResult result = documents.deleteOne(filter.build());
-        return result.getDeletedCount() > 0;
-    }
-
-    public boolean deleteByID(String collection, String id) {
-        return this.deleteOne(collection, new FindFilter().isIDEquals(id));
-    }
-
-    public long deleteMany(String collection, FindFilter filter) {
-        MongoCollection<Document> documents = database.getCollection(collection);
-        DeleteResult result = documents.deleteMany(filter.build());
-        return result.getDeletedCount();
-    }
+    /**
+     * Creates and registers a repository for the specified schema class.
+     * 
+     * @param <T>         The Schema type
+     * @param schemaClass The class object representing the schema
+     * @return A new Repository instance for the specified schema
+     */
+    <T extends Schema> Repository<T> addRepository(Class<T> schemaClass);
 }

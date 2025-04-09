@@ -2,132 +2,190 @@ package com.sammwy.milkshake;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import com.sammwy.classserializer.ClassSerializer;
-import com.sammwy.milkshake.find.FindFilter;
-import com.sammwy.milkshake.find.FindOptions;
-import com.sammwy.milkshake.operations.Operation;
+import com.sammwy.milkshake.query.Filter;
+import com.sammwy.milkshake.utils.ReflectionUtils;
+import com.sammwy.milkshake.utils.SchemaUtils;
 
-import org.bson.Document;
-
-@SuppressWarnings("unchecked")
-public class Repository<S> {
-    private Class<?> clazz;
+/**
+ * A generic repository implementation for performing CRUD operations on a
+ * specific Schema type.
+ * This class serves as the main interface between the application and the
+ * database,
+ * providing methods to create, find, update, and delete entities.
+ *
+ * @param <T> The Schema type this repository manages
+ */
+public class Repository<T extends Schema> {
+    private Class<T> schemaClass;
     private Provider provider;
-    private String collection;
 
-    private ClassSerializer serializer;
-
-    protected Repository(Class<?> clazz, Provider provider, String collection) {
-        this.clazz = clazz;
+    /**
+     * Constructs a new Repository instance for the specified Schema class.
+     *
+     * @param provider    The database provider used to establish connections
+     * @param schemaClass The Class object representing the Schema type this
+     *                    repository manages
+     * @throws IllegalArgumentException if either parameter is null
+     */
+    public Repository(Provider provider, Class<T> schemaClass) {
         this.provider = provider;
-        this.collection = collection;
-        this.serializer = ClassSerializer.getDefaultSerializer();
+        this.schemaClass = schemaClass;
     }
 
-    public String save(Entity entity) {
-        String id = entity.getID();
-
-        if (id == null) {
-            id = this.provider.create(this.collection, entity.getPropsAsDocument());
-            entity.setID(id);
-        } else {
-            this.provider.updateByID(this.collection, id, entity.getPropsAsUpdate());
-        }
-
-        return id;
+    /**
+     * Get the collection or table name associated with this repository
+     * 
+     * @return The collection or table name
+     */
+    public String getCollectionName() {
+        return ReflectionUtils.getCollectionName(this.schemaClass);
     }
 
-    public boolean delete(Entity entity) {
-        String id = entity.getID();
-
-        if (id != null) {
-            boolean result = this.provider.deleteByID(this.collection, id);
-            entity.setID(null);
-            return result;
-        } else {
-            return false;
-        }
+    /**
+     * Inserts a single entity into the database.
+     *
+     * @param entity The entity to insert
+     * @return true if the insertion was successful, false otherwise
+     * @throws IllegalArgumentException if the entity is null
+     */
+    public boolean insert(T entity) {
+        SchemaUtils.validateSchema(entity);
+        return provider.insert(getCollectionName(), entity.toMap());
     }
 
-    public boolean refresh(Entity entity) {
-        String id = entity.getID();
-
-        if (id != null) {
-            Document props = this.provider.findByID(this.collection, id);
-
-            if (props != null) {
-                entity.injectProps(props);
-                return true;
+    /**
+     * Inserts multiple entities into the database in a single operation.
+     *
+     * @param entities The list of entities to insert
+     * @return The number of successfully inserted entities
+     * @throws IllegalArgumentException if the entities list is null
+     */
+    public int insertMany(List<T> entities) {
+        List<Map<String, Object>> mapped = new ArrayList<>();
+        for (T entity : entities) {
+            try {
+                SchemaUtils.validateSchema(entity);
+                mapped.add(entity.toMap());
+            } catch (IllegalArgumentException e) {
+                // Ignore
             }
         }
-
-        return false;
+        return provider.insertMany(getCollectionName(), mapped);
     }
 
-    public S propsToEntity(Document doc) {
-        if (doc != null) {
-            S entity = (S) this.serializer.deserialize(this.clazz, doc);
-            ((Entity) entity).setID(doc.getObjectId("_id").toHexString());
-            return entity;
-        } else {
-            return null;
+    /**
+     * Insert or update a single entity in the database.
+     * 
+     * @param entity The entity to insert or update
+     * @return true if the operation was successful, false otherwise
+     */
+    public boolean upsert(T entity) {
+        SchemaUtils.validateSchema(entity);
+        return provider.upsert(getCollectionName(), entity.toMap());
+    }
+
+    /**
+     * Finds all entities matching the specified filter criteria.
+     *
+     * @param filter The filter conditions to apply to the query
+     * @return A List of matching entities, or an empty list if no matches found
+     */
+    public List<T> find(Filter.Find filter) {
+        List<Map<String, Object>> results = provider.find(getCollectionName(), filter);
+        List<T> converted = new ArrayList<>();
+        for (Map<String, Object> result : results) {
+            converted.add(Schema.fromMap(this.schemaClass, result));
         }
+        return converted;
     }
 
-    public List<S> propsToEntities(List<Document> props) {
-        List<S> result = new ArrayList<>();
-
-        for (Document doc : props) {
-            S entity = this.serializer.deserialize(this.clazz, doc);
-            ((Entity) entity).setID(doc.getObjectId("_id").toHexString());
-            result.add(entity);
-        }
-
-        return result;
+    /**
+     * Finds a single entity by its unique identifier.
+     *
+     * @param id The unique identifier of the entity to find
+     * @return The matching entity, or null if not found
+     */
+    public T findById(String id) {
+        Map<String, Object> result = provider.findById(getCollectionName(), id);
+        return result != null ? Schema.fromMap(this.schemaClass, result) : null;
     }
 
-    public S findOne(FindFilter filter) {
-        return this.propsToEntity(
-                this.provider.findOne(collection, filter));
+    /**
+     * Finds a single entity matching the specified filter criteria.
+     * If multiple entities match, only the first one is returned.
+     *
+     * @param filter The filter conditions to apply to the query
+     * @return The first matching entity, or null if no matches found
+     */
+    public T findOne(Filter.Find filter) {
+        Map<String, Object> result = provider.findOne(getCollectionName(), filter);
+        return result != null ? Schema.fromMap(this.schemaClass, result) : null;
     }
 
-    public S findByID(String id) {
-        return this.propsToEntity(
-                this.provider.findByID(collection, id));
+    /**
+     * Updates all entities matching the specified filter criteria.
+     *
+     * @param filter The filter conditions to select which entities to update
+     * @param update The update operations to apply to matching entities
+     * @return The number of entities that were successfully updated
+     */
+    public int update(Filter.Find filter, Filter.Update update) {
+        return provider.update(getCollectionName(), filter, update);
     }
 
-    public List<S> findMany(FindFilter filter, FindOptions options) {
-        return this.propsToEntities(
-                this.provider.findMany(collection, filter, options));
+    /**
+     * Updates a single entity by its unique identifier.
+     *
+     * @param id     The unique identifier of the entity to update
+     * @param update The update operations to apply to the entity
+     * @return true if the entity was found and updated, false otherwise
+     */
+    public boolean updateByID(String id, Filter.Update update) {
+        return provider.updateByID(getCollectionName(), id, update);
     }
 
-    public List<S> findMany(FindFilter filter) {
-        return this.propsToEntities(
-                this.provider.findMany(collection, filter));
+    /**
+     * Updates a single entity matching the specified filter criteria.
+     * If multiple entities match, only the first one is updated.
+     *
+     * @param filter The filter conditions to select which entity to update
+     * @param update The update operations to apply to the entity
+     * @return true if a matching entity was found and updated, false otherwise
+     */
+    public boolean updateOne(Filter.Find filter, Filter.Update update) {
+        return provider.updateOne(getCollectionName(), filter, update);
     }
 
-    public boolean updateOne(FindFilter filter, Operation update) {
-        return this.provider.updateOne(collection, filter, update);
+    /**
+     * Deletes all entities matching the specified filter criteria.
+     *
+     * @param filter The filter conditions to select which entities to delete
+     * @return The number of entities that were successfully deleted
+     */
+    public int delete(Filter.Find filter) {
+        return provider.delete(getCollectionName(), filter);
     }
 
-    public boolean updateByID(String id, Operation update) {
-        return this.provider.updateByID(collection, id, update);
-    }
-
-    public long updateMany(FindFilter filter, Operation update) {
-        return this.provider.updateMany(collection, filter, update);
-    }
-
-    public boolean deleteOne(FindFilter filter) {
-        return this.provider.deleteOne(collection, filter);
-    }
-
+    /**
+     * Deletes a single entity by its unique identifier.
+     *
+     * @param id The unique identifier of the entity to delete
+     * @return true if the entity was found and deleted, false otherwise
+     */
     public boolean deleteByID(String id) {
-        return this.provider.deleteByID(collection, id);
+        return provider.deleteByID(getCollectionName(), id);
     }
 
-    public long deleteMany(FindFilter filter) {
-        return this.provider.deleteMany(collection, filter);
+    /**
+     * Deletes a single entity matching the specified filter criteria.
+     * If multiple entities match, only the first one is deleted.
+     *
+     * @param filter The filter conditions to select which entity to delete
+     * @return true if a matching entity was found and deleted, false otherwise
+     */
+    public boolean deleteOne(Filter.Find filter) {
+        return provider.deleteOne(getCollectionName(), filter);
     }
 }
