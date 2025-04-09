@@ -18,20 +18,20 @@ import org.junit.jupiter.api.TestMethodOrder;
 import com.sammwy.milkshake.Provider;
 import com.sammwy.milkshake.ProviderInfo;
 import com.sammwy.milkshake.Repository;
-import com.sammwy.milkshake.providers.mongo.MongoProvider;
+import com.sammwy.milkshake.providers.sql.MySQLProvider;
 import com.sammwy.milkshake.query.Filter;
 import com.sammwy.milkshake.schemas.UserSchema;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class MongoOperationTests {
+public class MySQLTests {
     private static Repository<UserSchema> repository;
     private static String id;
 
     @BeforeAll
     public static void setup() {
-        System.out.println("Setting up MongoProvider...");
-        Provider provider = new MongoProvider();
-        provider.connect(new ProviderInfo("mongodb://localhost/milkshake-test"));
+        System.out.println("Setting up MySQLProvider...");
+        Provider provider = new MySQLProvider();
+        provider.connect(new ProviderInfo("mysql://user1234:pass1234@localhost:3306/database"));
         repository = provider.addRepository(UserSchema.class);
     }
 

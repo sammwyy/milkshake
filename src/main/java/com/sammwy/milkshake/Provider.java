@@ -34,6 +34,14 @@ public interface Provider {
     boolean insert(String collection, Map<String, Object> data);
 
     /**
+     * Initialize the table for a Schema class (Used by SQL like providers)
+     * 
+     * @param schemaClass The Schema class
+     * @return true if initialization was successful
+     */
+    <T extends Schema> boolean initialize(Class<T> schemaClass);
+
+    /**
      * Inserts multiple documents into the specified collection in a single
      * operation.
      * 

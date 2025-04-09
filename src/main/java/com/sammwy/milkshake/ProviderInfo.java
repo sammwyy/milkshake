@@ -2,6 +2,8 @@ package com.sammwy.milkshake;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents authentication and connection information for a database provider.
@@ -16,6 +18,7 @@ public class ProviderInfo {
     private String username;
     private String password;
     private String database;
+    private Map<String, String> options;
 
     /**
      * Constructs a complete ProviderInfo with all connection parameters.
@@ -34,6 +37,7 @@ public class ProviderInfo {
         this.username = username;
         this.password = password;
         this.database = database;
+        this.options = new HashMap<>();
     }
 
     /**
@@ -77,6 +81,8 @@ public class ProviderInfo {
 
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Invalid URI format: " + uri, e);
+        } finally {
+            this.options = new HashMap<>();
         }
     }
 
@@ -105,6 +111,15 @@ public class ProviderInfo {
      */
     public String getPort() {
         return port;
+    }
+
+    /**
+     * Gets the database server port as an integer.
+     * 
+     * @return The port number, or -1 if not specified
+     */
+    public int getPortInt() {
+        return port != null ? Integer.parseInt(port) : -1;
     }
 
     /**
@@ -189,6 +204,23 @@ public class ProviderInfo {
     }
 
     /**
+     * Get query parameters as string.
+     * 
+     * @return The query parameters as string
+     */
+    public String getOptionsAsString() {
+        StringBuilder sb = new StringBuilder();
+        if (!options.isEmpty()) {
+            sb.append("?");
+            for (Map.Entry<String, String> entry : options.entrySet()) {
+                sb.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        return sb.toString();
+    }
+
+    /**
      * Generates a URI string representation of the connection information.
      * Uses the specified default protocol if none is set.
      *
@@ -213,6 +245,109 @@ public class ProviderInfo {
             sb.append("/").append(database);
         }
 
+        sb.append(this.getOptionsAsString());
         return sb.toString();
+    }
+
+    /**
+     * Adds a query parameter to the connection URI.
+     * 
+     * @param key   The parameter name
+     * @param value The parameter value
+     */
+    public void option(String key, String value) {
+        String existing = options.get(key);
+        if (existing != null) {
+            options.put(key, existing + "," + value);
+        } else {
+            options.put(key, value);
+        }
+    }
+
+    /**
+     * Adds a query parameter to the connection URI.
+     * 
+     * @param option The parameter name
+     * @param value  The parameter value
+     */
+    public void option(Options option, String value) {
+        option(option.getKey(), value);
+    }
+
+    /**
+     * Adds a query parameter to the connection URI.
+     * 
+     * @param option The parameter name
+     * @param value  The parameter value
+     */
+    public void option(Options option, int value) {
+        option(option.getKey(), String.valueOf(value));
+    }
+
+    /**
+     * Adds a query parameter to the connection URI.
+     * 
+     * @param option The parameter name
+     * @param value  The parameter value
+     */
+    public void option(Options option, long value) {
+        option(option.getKey(), String.valueOf(value));
+    }
+
+    /**
+     * Adds a query parameter to the connection URI.
+     * 
+     * @param option The parameter name
+     * @param value  The parameter value
+     */
+    public void option(Options option, boolean value) {
+        option(option.getKey(), String.valueOf(value));
+    }
+
+    /**
+     * Adds a query parameter to the connection URI if it is not already present.
+     * 
+     * @param option The parameter name
+     * @param value  The parameter value
+     */
+    public void optionIfNotPresent(Options option, String value) {
+        if (options.get(option.getKey()) == null) {
+            option(option, value);
+        }
+    }
+
+    /**
+     * Common options enum
+     */
+    public enum Options {
+        ALLOW_PUBLIC_KEY_RETRIEVAL("allowPublicKeyRetrieval"),
+        USE_SSL("useSSL"),
+        REQUIRE_SSL("requireSSL"),
+        VERIFY_SERVER_CERTIFICATE("verifyServerCertificate"),
+        CLIENT_CERT_KEY_STORE_URL("clientCertificateKeyStoreUrl"),
+        CLIENT_CERT_KEY_STORE_PASSWORD("clientCertificateKeyStorePassword"),
+        AUTO_RECONNECT("autoReconnect"),
+        SERVER_TIMEZONE("serverTimezone"),
+        CHARACTER_ENCODING("characterEncoding"),
+        USE_UNICODE("useUnicode"),
+        CACHE_PREP_STMTS("cachePrepStmts"),
+        PREP_STMT_CACHE_SIZE("prepStmtCacheSize"),
+        PREP_STMT_CACHE_SQL_LIMIT("prepStmtCacheSqlLimit"),
+        USE_SERVER_PREP_STMTS("useServerPrepStmts"),
+        LOG_WARNINGS("logger"),
+        PROFILE_SQL("profileSQL"),
+        TRACE_PROTOCOL("traceProtocol"),
+        CONNECTION_TIMEOUT("connectTimeout"),
+        SOCKET_TIMEOUT("socketTimeout");
+
+        private final String key;
+
+        Options(String key) {
+            this.key = key;
+        }
+
+        public String getKey() {
+            return key;
+        }
     }
 }

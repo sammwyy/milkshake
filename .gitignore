@@ -7,3 +7,6 @@ build
 .server
 
 bin
+
+test.db
+*.db

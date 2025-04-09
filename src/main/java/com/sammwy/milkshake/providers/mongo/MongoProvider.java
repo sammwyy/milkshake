@@ -129,4 +129,9 @@ public class MongoProvider implements Provider {
         RepositoryCache.cache(schemaClass, repo);
         return repo;
     }
+
+    @Override
+    public <T extends Schema> boolean initialize(Class<T> schemaClass) {
+        return true;
+    }
 }
