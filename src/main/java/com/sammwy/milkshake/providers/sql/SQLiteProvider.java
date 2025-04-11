@@ -41,21 +41,16 @@ public class SQLiteProvider extends SQLProvider {
     }
 
     @Override
-    public boolean upsert(String collection, Map<String, Object> data) {
-        String idField = "_id";
-        Object idValue = data.get(idField);
-
-        if (idValue == null) {
-            throw new IllegalArgumentException("Missing ID field for upsert operation");
-        }
+    public boolean upsert(String collection, Map<String, Object> data, String primaryKey) {
+        String id = (String) data.get(primaryKey);
 
         try {
             // Check if record exists
-            String checkSql = "SELECT 1 FROM " + collection + " WHERE " + idField + " = ?";
+            String checkSql = "SELECT 1 FROM " + collection + " WHERE " + primaryKey + " = ?";
             boolean exists;
 
             try (PreparedStatement checkStmt = connection.prepareStatement(checkSql)) {
-                checkStmt.setObject(1, idValue);
+                checkStmt.setObject(1, id);
                 exists = checkStmt.executeQuery().next();
             }
 
@@ -65,12 +60,12 @@ public class SQLiteProvider extends SQLProvider {
                 Update update = new Update();
 
                 for (Map.Entry<String, Object> entry : data.entrySet()) {
-                    if (!entry.getKey().equals(idField)) {
+                    if (!entry.getKey().equals(primaryKey)) {
                         update.set(entry.getKey(), entry.getValue());
                     }
                 }
 
-                return updateByID(collection, idValue.toString(), update);
+                return updateByID(collection, primaryKey, id, update);
             } else {
                 // Insert
                 return insert(collection, data);

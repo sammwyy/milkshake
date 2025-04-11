@@ -1,13 +1,13 @@
 package com.sammwy.milkshake;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.sammwy.milkshake.annotations.SchemaType;
 import com.sammwy.milkshake.query.Filter;
 import com.sammwy.milkshake.schema.Schema;
-import com.sammwy.milkshake.utils.ReflectionUtils;
-import com.sammwy.milkshake.utils.SchemaUtils;
 
 /**
  * A generic repository implementation for performing CRUD operations on a
@@ -21,6 +21,7 @@ import com.sammwy.milkshake.utils.SchemaUtils;
 public class Repository<T extends Schema> {
     private Class<T> schemaClass;
     private Provider provider;
+    private String primaryKey;
 
     /**
      * Constructs a new Repository instance for the specified Schema class.
@@ -33,6 +34,20 @@ public class Repository<T extends Schema> {
     public Repository(Provider provider, Class<T> schemaClass) {
         this.provider = provider;
         this.schemaClass = schemaClass;
+
+        Field idField = Schema.getIdFieldOf(schemaClass);
+        if (idField != null) {
+            primaryKey = Schema.getIdKeyNameOf(idField);
+        }
+    }
+
+    /**
+     * Gets the name of the unique identifier for the primary key.
+     * 
+     * @return The name of the ID field
+     */
+    public String getPrimaryKey() {
+        return primaryKey;
     }
 
     /**
@@ -41,17 +56,7 @@ public class Repository<T extends Schema> {
      * @return The collection or table name
      */
     public String getCollectionName() {
-        return ReflectionUtils.getCollectionName(this.schemaClass);
-    }
-
-    /**
-     * Determines if embedded document serialization should use prefixes
-     * 
-     * @return true if prefixes should be used (SQL databases), false for nested
-     *         documents (MongoDB)
-     */
-    private boolean shouldUsePrefix() {
-        return !provider.supportsEmbedded();
+        return getCollectionName(this.schemaClass);
     }
 
     /**
@@ -62,7 +67,7 @@ public class Repository<T extends Schema> {
      * @throws IllegalArgumentException if the entity is null
      */
     public boolean insert(T entity) {
-        SchemaUtils.validateSchema(entity);
+        validateSchema(entity);
         return provider.insert(getCollectionName(), entity.toMap());
     }
 
@@ -77,7 +82,7 @@ public class Repository<T extends Schema> {
         List<Map<String, Object>> mapped = new ArrayList<>();
         for (T entity : entities) {
             try {
-                SchemaUtils.validateSchema(entity);
+                validateSchema(entity);
                 mapped.add(entity.toMap());
             } catch (IllegalArgumentException e) {
                 // Ignore
@@ -93,8 +98,8 @@ public class Repository<T extends Schema> {
      * @return true if the operation was successful, false otherwise
      */
     public boolean upsert(T entity) {
-        SchemaUtils.validateSchema(entity);
-        return provider.upsert(getCollectionName(), entity.toMap());
+        validateSchema(entity);
+        return provider.upsert(getCollectionName(), entity.toMap(), this.getPrimaryKey());
     }
 
     /**
@@ -119,7 +124,7 @@ public class Repository<T extends Schema> {
      * @return The matching entity, or null if not found
      */
     public T findById(String id) {
-        Map<String, Object> result = provider.findById(getCollectionName(), id);
+        Map<String, Object> result = provider.findById(getCollectionName(), primaryKey, id);
         return result != null ? Schema.fromMap(this.schemaClass, result) : null;
     }
 
@@ -154,7 +159,7 @@ public class Repository<T extends Schema> {
      * @return true if the entity was found and updated, false otherwise
      */
     public boolean updateByID(String id, Filter.Update update) {
-        return provider.updateByID(getCollectionName(), id, update);
+        return provider.updateByID(getCollectionName(), primaryKey, id, update);
     }
 
     /**
@@ -186,7 +191,7 @@ public class Repository<T extends Schema> {
      * @return true if the entity was found and deleted, false otherwise
      */
     public boolean deleteByID(String id) {
-        return provider.deleteByID(getCollectionName(), id);
+        return provider.deleteByID(getCollectionName(), primaryKey, id);
     }
 
     /**
@@ -207,5 +212,30 @@ public class Repository<T extends Schema> {
      */
     public Provider getProvider() {
         return provider;
+    }
+
+    private static boolean validateSchema(Schema entity) {
+        if (entity == null)
+            throw new IllegalArgumentException("Entity cannot be null");
+        return true;
+    }
+
+    /**
+     * Gets the collection name for a schema class.
+     * Uses the @SchemaType annotation value if present, otherwise defaults to the
+     * class simple name.
+     *
+     * @param schemaClass The schema class to inspect
+     * @return The collection name to use for this schema
+     */
+    private static String getCollectionName(Class<? extends Schema> schemaClass) {
+        if (schemaClass.isAnnotationPresent(SchemaType.class)) {
+            SchemaType schemaType = schemaClass.getAnnotation(SchemaType.class);
+            String value = schemaType.value();
+            if (value != null && !value.isEmpty()) {
+                return value;
+            }
+        }
+        return schemaClass.getSimpleName();
     }
 }

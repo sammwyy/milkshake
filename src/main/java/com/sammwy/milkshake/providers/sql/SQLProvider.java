@@ -14,19 +14,20 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import com.sammwy.milkshake.Provider;
+import com.sammwy.classserializer.ClassUtils;
 import com.sammwy.milkshake.ProviderInfo;
 import com.sammwy.milkshake.Repository;
 import com.sammwy.milkshake.RepositoryCache;
 import com.sammwy.milkshake.annotations.SchemaType;
+import com.sammwy.milkshake.providers.AbstractProvider;
 import com.sammwy.milkshake.query.Filter.Find;
 import com.sammwy.milkshake.query.Filter.Update;
 import com.sammwy.milkshake.schema.Schema;
-import com.sammwy.milkshake.utils.ReflectionUtils;
 
-public abstract class SQLProvider implements Provider {
+public abstract class SQLProvider extends AbstractProvider {
     protected Connection connection;
 
     protected abstract String getDriverClass();
@@ -39,7 +40,7 @@ public abstract class SQLProvider implements Provider {
 
     @Override
     public boolean supportsEmbedded() {
-        return true;
+        return false;
     }
 
     @Override
@@ -165,8 +166,8 @@ public abstract class SQLProvider implements Provider {
     }
 
     @Override
-    public Map<String, Object> findById(String collection, String id) {
-        return findOne(collection, new Find().eq("_id", id));
+    public Map<String, Object> findById(String collection, String primaryKey, String id) {
+        return findOne(collection, new Find().eq(primaryKey, id));
     }
 
     @Override
@@ -205,8 +206,8 @@ public abstract class SQLProvider implements Provider {
     }
 
     @Override
-    public boolean updateByID(String collection, String id, Update update) {
-        return update(collection, new Find().eq("_id", id), update) > 0;
+    public boolean updateByID(String collection, String primaryKey, String id, Update update) {
+        return update(collection, new Find().eq(primaryKey, id), update) > 0;
     }
 
     @Override
@@ -265,8 +266,8 @@ public abstract class SQLProvider implements Provider {
     }
 
     @Override
-    public boolean deleteByID(String collection, String id) {
-        return delete(collection, new Find().eq("_id", id)) > 0;
+    public boolean deleteByID(String collection, String primaryKey, String id) {
+        return delete(collection, new Find().eq(primaryKey, id)) > 0;
     }
 
     @Override
@@ -293,7 +294,15 @@ public abstract class SQLProvider implements Provider {
     public <T extends Schema> Repository<T> addRepository(Class<T> schemaClass) {
         Repository<T> repo = new Repository<>(this, schemaClass);
         RepositoryCache.cache(schemaClass, repo);
-        initialize(schemaClass);
+
+        Field idField = Schema.getIdFieldOf(schemaClass);
+        if (idField != null) {
+            String idFieldKey = Schema.getIdKeyNameOf(idField);
+            initialize(schemaClass, idFieldKey);
+        } else {
+            throw new RuntimeException("Schema must have an @ID field");
+        }
+
         return repo;
     }
 
@@ -361,7 +370,8 @@ public abstract class SQLProvider implements Provider {
      * @param schemaClass The Schema class to initialize a table for
      * @return true if initialization was successful
      */
-    public <T extends Schema> boolean initialize(Class<T> schemaClass) {
+    @Override
+    public <T extends Schema> boolean initialize(Class<T> schemaClass, String primaryKey) {
         SchemaType schemaType = schemaClass.getAnnotation(SchemaType.class);
         if (schemaType == null) {
             throw new RuntimeException("Schema class " + schemaClass.getName() + " is missing @SchemaType annotation");
@@ -383,37 +393,29 @@ public abstract class SQLProvider implements Provider {
             createTableSQL.append("CREATE TABLE IF NOT EXISTS ").append(tableName).append(" (");
 
             if (this.isSQLite()) {
-                createTableSQL.append("_id TEXT PRIMARY KEY");
+                createTableSQL.append(primaryKey + " TEXT PRIMARY KEY");
             } else {
-                createTableSQL.append("`_id` VARCHAR(255) PRIMARY KEY");
+                createTableSQL.append("`" + primaryKey + "` VARCHAR(255) PRIMARY KEY");
             }
 
             // Get all fields from the schema class including parent classes
-            List<Field> fields = ReflectionUtils.getPropFields(schemaClass);
-            for (Field field : fields) {
+            Object instance = ClassUtils.createInstance(schemaClass);
+            Map<String, Object> fieldsMap = this.getSerializer().serialize(instance);
+
+            for (Entry<String, Object> entry : fieldsMap.entrySet()) {
+                String fieldName = entry.getKey();
+                Class<?> fieldType = entry.getValue().getClass();
+
                 // Skip the id field as we've already added it
-                if (field.getName().equals("id")) {
+                if (fieldName.equals(primaryKey)) {
                     continue;
                 }
 
-                // Skip transient fields
-                if (java.lang.reflect.Modifier.isTransient(field.getModifiers())) {
-                    continue;
-                }
-
-                // Skip static fields
-                if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
-                    continue;
-                }
-
-                // Skip the cachedFields map
-                if (field.getName().equals("cachedFields")) {
-                    continue;
-                }
-
-                String sqlType = SQLUtils.getSQLType(field.getType(), this.isSQLite());
+                String sqlType = SQLUtils.getSQLType(fieldType, this.isSQLite());
                 if (sqlType != null) {
-                    createTableSQL.append(", ").append(field.getName()).append(" ").append(sqlType);
+                    createTableSQL.append(", ").append(fieldName).append(" ").append(sqlType);
+                } else {
+                    throw new RuntimeException("Unsupported field type: " + fieldType.getName());
                 }
             }
 
@@ -430,6 +432,8 @@ public abstract class SQLProvider implements Provider {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to initialize table for " + schemaClass.getName(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse table for " + schemaClass.getName(), e);
         }
     }
 

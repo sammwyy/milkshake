@@ -20,6 +20,8 @@ import com.sammwy.milkshake.ProviderInfo;
 import com.sammwy.milkshake.Repository;
 import com.sammwy.milkshake.providers.mongo.MongoProvider;
 import com.sammwy.milkshake.query.Filter;
+import com.sammwy.milkshake.schemas.EmbeddedObject;
+import com.sammwy.milkshake.schemas.EmbeddedSchema;
 import com.sammwy.milkshake.schemas.UserSchema;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -27,7 +29,7 @@ public class MongoDBTests {
     private static Repository<UserSchema> repository;
     private static String id;
 
-    // private static Repository<EmbeddedSchema> embeddedRepository;
+    private static Repository<EmbeddedSchema> embeddedRepository;
 
     @BeforeAll
     public static void setup() {
@@ -35,12 +37,12 @@ public class MongoDBTests {
         Provider provider = new MongoProvider();
         provider.connect(new ProviderInfo("mongodb://localhost/milkshake-test"));
         repository = provider.addRepository(UserSchema.class);
-        // embeddedRepository = provider.addRepository(EmbeddedSchema.class);
+        embeddedRepository = provider.addRepository(EmbeddedSchema.class);
     }
 
     @AfterAll
     public static void clearDB() {
-        repository.delete(new Filter.Find());
+        // repository.delete(new Filter.Find());
         System.out.println("Cleared test collection.");
     }
 
@@ -112,31 +114,25 @@ public class MongoDBTests {
         }
     }
 
-    /**
-     * @Test
-     *       @Order(6)
-     *       public void testEmbedded() {
-     *       EmbeddedSchema entity = new EmbeddedSchema();
-     *       entity.single = "Hello World";
-     *       entity.embedded = new EmbeddedObject();
-     *       entity.embedded.child = "Child";
-     *       entity.embedded.foo = 12345;
-     *       entity.embedded.hello = true;
-     * 
-     *       boolean saved = entity.save();
-     *       assertTrue(saved, "Entity should be saved");
-     * 
-     *       EmbeddedSchema result = embeddedRepository.findById(entity.getId());
-     *       assertNotNull(result, "Entity should be found by ID");
-     * 
-     *       assertEquals(entity.single, result.single, "Single field should
-     *       match");
-     *       assertEquals(entity.embedded.child, result.embedded.child, "Child field
-     *       should match");
-     *       assertEquals(entity.embedded.foo, result.embedded.foo, "Foo field
-     *       should match");
-     *       assertEquals(entity.embedded.hello, result.embedded.hello, "Hello field
-     *       should match");
-     *       }
-     */
+    @Test
+    @Order(6)
+    public void testEmbedded() {
+        EmbeddedSchema entity = new EmbeddedSchema();
+        entity.single = "Hello World";
+        entity.embedded = new EmbeddedObject();
+        entity.embedded.child = "Child";
+        entity.embedded.foo = 12345;
+        entity.embedded.hello = true;
+
+        boolean saved = entity.save();
+        assertTrue(saved, "Entity should be saved");
+
+        EmbeddedSchema result = embeddedRepository.findById(entity.getId());
+        assertNotNull(result, "Entity should be found by ID");
+
+        assertEquals(entity.single, result.single, "Single field should match");
+        assertEquals(entity.embedded.child, result.embedded.child, "Child field should match");
+        assertEquals(entity.embedded.foo, result.embedded.foo, "Foo field should match");
+        assertEquals(entity.embedded.hello, result.embedded.hello, "Hello field should match");
+    }
 }

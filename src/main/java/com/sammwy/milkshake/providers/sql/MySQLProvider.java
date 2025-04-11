@@ -48,7 +48,7 @@ public class MySQLProvider extends SQLProvider {
     }
 
     @Override
-    public boolean upsert(String collection, Map<String, Object> data) {
+    public boolean upsert(String collection, Map<String, Object> data, String primaryKey) {
         try {
             StringBuilder sql = new StringBuilder("INSERT INTO " + collection + " (");
             StringBuilder values = new StringBuilder();
@@ -77,7 +77,7 @@ public class MySQLProvider extends SQLProvider {
             // Prepare ON DUPLICATE KEY UPDATE clause
             first = true;
             for (String key : keys) {
-                if (key.equals("_id"))
+                if (key.equals(primaryKey))
                     continue; // Avoid updating the primary key
 
                 if (!first) {

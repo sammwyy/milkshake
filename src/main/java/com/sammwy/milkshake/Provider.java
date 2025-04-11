@@ -3,6 +3,7 @@ package com.sammwy.milkshake;
 import java.util.List;
 import java.util.Map;
 
+import com.sammwy.classserializer.ClassSerializer;
 import com.sammwy.milkshake.query.Filter;
 import com.sammwy.milkshake.schema.Schema;
 
@@ -14,6 +15,12 @@ import com.sammwy.milkshake.schema.Schema;
  * management.
  */
 public interface Provider {
+    /**
+     * Return the ClassSerializer used by the provider
+     * 
+     * @return The ClassSerializer
+     */
+    public ClassSerializer getSerializer();
 
     /**
      * Return whether the provider supports embedded databases
@@ -44,9 +51,10 @@ public interface Provider {
      * Initialize the table for a Schema class (Used by SQL like providers)
      * 
      * @param schemaClass The Schema class
+     * @param primaryKey  The primary key
      * @return true if initialization was successful
      */
-    <T extends Schema> boolean initialize(Class<T> schemaClass);
+    <T extends Schema> boolean initialize(Class<T> schemaClass, String primaryKey);
 
     /**
      * Inserts multiple documents into the specified collection in a single
@@ -64,9 +72,10 @@ public interface Provider {
      * 
      * @param collection The name of the collection
      * @param data       The document data including identifier fields
+     * @param primaryKey The name of the identifier field
      * @return true if the operation was successful, false otherwise
      */
-    boolean upsert(String collection, Map<String, Object> data);
+    boolean upsert(String collection, Map<String, Object> data, String primaryKey);
 
     /**
      * Finds all documents matching the specified criteria in the collection.
@@ -93,7 +102,7 @@ public interface Provider {
      * @param id         The unique identifier of the document
      * @return The matching document, or null if not found
      */
-    Map<String, Object> findById(String collection, String id);
+    Map<String, Object> findById(String collection, String primaryKey, String id);
 
     /**
      * Updates all documents matching the specified criteria in the collection.
@@ -113,7 +122,7 @@ public interface Provider {
      * @param update     The update operations as key-value pairs
      * @return true if the document was found and updated, false otherwise
      */
-    boolean updateByID(String collection, String id, Filter.Update update);
+    boolean updateByID(String collection, String primaryKey, String id, Filter.Update update);
 
     /**
      * Updates the first document matching the specified criteria in the collection.
@@ -141,7 +150,7 @@ public interface Provider {
      * @param id         The unique identifier of the document to delete
      * @return true if the document was found and deleted, false otherwise
      */
-    boolean deleteByID(String collection, String id);
+    boolean deleteByID(String collection, String primaryKey, String id);
 
     /**
      * Deletes the first document matching the specified criteria from the

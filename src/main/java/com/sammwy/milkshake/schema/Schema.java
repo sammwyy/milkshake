@@ -1,12 +1,13 @@
 package com.sammwy.milkshake.schema;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import com.sammwy.milkshake.Repository;
 import com.sammwy.milkshake.RepositoryCache;
-import com.sammwy.milkshake.utils.ReflectionUtils;
+import com.sammwy.milkshake.annotations.ID;
 
 /**
  * Abstract base class for all database schema definitions.
@@ -29,14 +30,19 @@ import com.sammwy.milkshake.utils.ReflectionUtils;
  * @see ReflectionUtils
  */
 public abstract class Schema {
-    private String id;
     private Map<String, Object> cachedFields = new HashMap<>();
+    private Repository<? extends Schema> repository;
+    private Field idField;
 
     /**
      * Constructs a new Schema instance with a randomly generated UUID.
      */
     public Schema() {
-        this.id = UUID.randomUUID().toString();
+        Field idField = Schema.getIdFieldOf(this.getClass());
+        if (idField != null) {
+            this.idField = idField;
+            this.setId(UUID.randomUUID().toString());
+        }
     }
 
     /**
@@ -45,7 +51,12 @@ public abstract class Schema {
      * @return The document ID string
      */
     public String getId() {
-        return id;
+        try {
+            return this.idField != null ? (String) this.idField.get(this) : null;
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
@@ -54,7 +65,11 @@ public abstract class Schema {
      * @param id The new ID to assign to this document
      */
     public void setId(String id) {
-        this.id = id;
+        try {
+            this.idField.set(this, id);
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -92,7 +107,7 @@ public abstract class Schema {
      * @return true if the document was found and deleted, false otherwise
      */
     public boolean delete() {
-        return this.getDefaultRepository().deleteByID(this.id);
+        return this.getDefaultRepository().deleteByID(this.getId());
     }
 
     /**
@@ -100,10 +115,9 @@ public abstract class Schema {
      * operations.
      * 
      * @return A Map containing all persistent fields and their values
-     * @see ReflectionUtils#schemaToDocument(Schema)
      */
     public Map<String, Object> toMap() {
-        return ReflectionUtils.schemaToDocument(this);
+        return this.getRepository().getProvider().getSerializer().serialize(this);
     }
 
     /**
@@ -113,10 +127,22 @@ public abstract class Schema {
      * @param schemaClass The class of the Schema to create
      * @param data        The document data as key-value pairs
      * @return A new Schema instance populated with the provided data
-     * @see ReflectionUtils#documentToSchema(Class, Map)
      */
     public static <T extends Schema> T fromMap(Class<T> schemaClass, Map<String, Object> data) {
-        return ReflectionUtils.documentToSchema(schemaClass, data);
+        return (T) RepositoryCache.get(schemaClass).getProvider().getSerializer()
+                .deserialize(schemaClass, data);
+    }
+
+    /**
+     * Gets the Repository instance associated with this Schema.
+     * 
+     * @return
+     */
+    public Repository<? extends Schema> getRepository() {
+        if (this.repository == null) {
+            return this.getDefaultRepository();
+        }
+        return this.repository;
     }
 
     /**
@@ -128,5 +154,31 @@ public abstract class Schema {
     @SuppressWarnings("unchecked")
     public Repository<Schema> getDefaultRepository() {
         return (Repository<Schema>) RepositoryCache.get(this.getClass());
+    }
+
+    /**
+     * Gets the ID field of the schema class
+     * 
+     * @param schemaClass The schema class
+     * @return The ID field
+     */
+    public static Field getIdFieldOf(Class<? extends Schema> schemaClass) {
+        for (Field field : schemaClass.getDeclaredFields()) {
+            if (field.isAnnotationPresent(ID.class)) {
+                return field;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the name of the ID field
+     * 
+     * @param field The ID field
+     * @return The name of the ID field
+     */
+    public static String getIdKeyNameOf(Field field) {
+        ID id = field.getAnnotation(ID.class);
+        return id.name().isEmpty() ? field.getName() : id.name();
     }
 }

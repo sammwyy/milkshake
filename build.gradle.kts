@@ -15,6 +15,7 @@ java {
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
@@ -26,6 +27,9 @@ dependencies {
 
     // MySQL Java Driver
     implementation("mysql:mysql-connector-java:8.0.33")
+
+    // Class serializer
+    implementation("com.sammwy:class-serializer:1.1.1")
 
     // Test
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")

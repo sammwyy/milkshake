@@ -14,19 +14,19 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
-import com.sammwy.milkshake.Provider;
 import com.sammwy.milkshake.ProviderInfo;
 import com.sammwy.milkshake.Repository;
 import com.sammwy.milkshake.RepositoryCache;
+import com.sammwy.milkshake.providers.AbstractProvider;
 import com.sammwy.milkshake.query.Filter;
 import com.sammwy.milkshake.schema.Schema;
 
-public class MongoProvider implements Provider {
+public class MongoProvider extends AbstractProvider {
     private MongoClient client;
     private MongoDatabase database;
 
     @Override
-    public <T extends Schema> boolean initialize(Class<T> schemaClass) {
+    public <T extends Schema> boolean initialize(Class<T> schemaClass, String primaryKey) {
         return true;
     }
 
@@ -55,9 +55,9 @@ public class MongoProvider implements Provider {
     }
 
     @Override
-    public boolean upsert(String collection, Map<String, Object> data) {
-        String id = (String) data.get("_id");
-        Document filter = new Document("_id", id);
+    public boolean upsert(String collection, Map<String, Object> data, String primaryKey) {
+        String id = (String) data.get(primaryKey);
+        Document filter = new Document(primaryKey, id);
         Document update = new Document("$set", new Document(data));
         UpdateOptions options = new UpdateOptions().upsert(true);
         database.getCollection(collection).updateOne(filter, update, options);
@@ -83,8 +83,8 @@ public class MongoProvider implements Provider {
     }
 
     @Override
-    public Map<String, Object> findById(String collection, String id) {
-        Document doc = database.getCollection(collection).find(new Document("_id", id)).first();
+    public Map<String, Object> findById(String collection, String primaryKey, String id) {
+        Document doc = database.getCollection(collection).find(new Document(primaryKey, id)).first();
         return doc;
     }
 
@@ -98,9 +98,9 @@ public class MongoProvider implements Provider {
     }
 
     @Override
-    public boolean updateByID(String collection, String id, Filter.Update update) {
+    public boolean updateByID(String collection, String primaryKey, String id, Filter.Update update) {
         Bson updateDoc = MongoUtils.toBson(update);
-        Document filter = new Document("_id", id);
+        Document filter = new Document(primaryKey, id);
         UpdateResult result = database.getCollection(collection).updateOne(filter, updateDoc);
         return result.getModifiedCount() > 0;
     }
@@ -121,8 +121,8 @@ public class MongoProvider implements Provider {
     }
 
     @Override
-    public boolean deleteByID(String collection, String id) {
-        DeleteResult result = database.getCollection(collection).deleteOne(new Document("_id", id));
+    public boolean deleteByID(String collection, String primaryKey, String id) {
+        DeleteResult result = database.getCollection(collection).deleteOne(new Document(primaryKey, id));
         return result.getDeletedCount() > 0;
     }
 
